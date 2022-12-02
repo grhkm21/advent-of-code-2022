@@ -33,3 +33,26 @@ match n.parse::<i64>() {
 ```
 
 Of course, Rust supports dynamic size data structures such as `Vec`. It is defined in `std::vec`, but a set of things are auto imported in every program, as defined in `std::prelude`. The full list can be found [here](https://doc.rust-lang.org/std/prelude/index.html). One important method of `Vec` is `.sort_unstable_by`, which takes a mutable comparator that returns an `Ordering` (`FnMut(&T, &T) -> Ordering`) as argument.
+
+## Day 2
+
+### Rust code (!)
+
+In today's code, I also used the `match` syntax from before, this time to unpack / map values. For example, if we know the variable `vec: Vec<usize>` is of length 2, then we can unpack it into two `usize` variables `a` and `b` by writing
+
+```rust
+let (a, b) = match vec[..] { // matches tuple (a, b)
+    [a, b] => (a, b),        // if vec is of pattern [a, b], then returns (a, b)
+    _ => unreachable!(),     // unreachable
+};
+```
+
+Also, the syntax of declaring a function is `fn <func-name>(<arg-name>: <type-name>, ...) [-> return-type]`. For example,
+
+```rust
+fn enhance(mut pixels: Vec<Vec<usize>>, r: usize, c: usize) -> Vec<Vec<usize>> {
+    // ...
+}
+```
+
+Other than that, the syntax required for today's problem is not too advanced.
