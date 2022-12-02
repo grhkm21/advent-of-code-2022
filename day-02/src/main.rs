@@ -1,5 +1,7 @@
 use std::fs;
 
+const FILE_ERR: &str = "err: can't read file";
+
 fn round(move1: usize, move2: usize) -> usize {
     // returns score based on whether move2 beats move1
     return match [move1, move2] {
@@ -16,30 +18,29 @@ fn round(move1: usize, move2: usize) -> usize {
     };
 }
 
+fn read_tuples(from: &str) -> Vec<(&str, &str)> {
+    from.trim()
+        .lines()
+        .map(|x| x.split_once(" ").unwrap())
+        .collect()
+}
+
 fn solve_part_1() {
-    let file_path = "input";
     let mut score = 0;
 
-    for line in fs::read_to_string(file_path)
-        .expect("err: can't read from file")
-        .trim()
-        .split("\n")
-        .collect::<Vec<&str>>()
-        .iter()
-        .map(|x| x.split(" ").collect::<Vec<&str>>())
-    {
+    for line in read_tuples(&fs::read_to_string("input").expect(FILE_ERR)) {
         // convert to numbers
-        let move1 = match &line[..] {
-            &["A", _] => 1,
-            &["B", _] => 2,
-            &["C", _] => 3,
+        let move1 = match &line {
+            ("A", _) => 1,
+            ("B", _) => 2,
+            ("C", _) => 3,
             _ => unreachable!(),
         };
 
-        let move2 = match &line[..] {
-            &[_, "X"] => 1,
-            &[_, "Y"] => 2,
-            &[_, "Z"] => 3,
+        let move2 = match &line {
+            (_, "X") => 1,
+            (_, "Y") => 2,
+            (_, "Z") => 3,
             _ => unreachable!(),
         };
 
@@ -54,29 +55,21 @@ fn solve_part_1() {
 }
 
 fn solve_part_2() {
-    let file_path = "input";
     let mut score = 0;
 
-    for line in fs::read_to_string(file_path)
-        .expect("err: can't read from file")
-        .trim()
-        .split("\n")
-        .collect::<Vec<&str>>()
-        .iter()
-        .map(|x| x.split(" ").collect::<Vec<&str>>())
-    {
+    for line in read_tuples(&fs::read_to_string("input").expect(FILE_ERR)) {
         // convert to numbers
-        let move1 = match &line[..] {
-            &["A", _] => 1,
-            &["B", _] => 2,
-            &["C", _] => 3,
+        let move1 = match &line {
+            ("A", _) => 1,
+            ("B", _) => 2,
+            ("C", _) => 3,
             _ => unreachable!(),
         };
 
-        let target_round = match &line[..] {
-            &[_, "X"] => 0,
-            &[_, "Y"] => 3,
-            &[_, "Z"] => 6,
+        let target_round = match &line {
+            (_, "X") => 0,
+            (_, "Y") => 3,
+            (_, "Z") => 6,
             _ => unreachable!(),
         };
 
