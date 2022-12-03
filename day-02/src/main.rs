@@ -18,7 +18,7 @@ fn round(move1: usize, move2: usize) -> usize {
     };
 }
 
-fn read_tuples(from: &str) -> Vec<(&str, &str)> {
+fn parse_tuples(from: &str) -> Vec<(&str, &str)> {
     from.trim()
         .lines()
         .map(|x| x.split_once(" ").unwrap())
@@ -28,7 +28,7 @@ fn read_tuples(from: &str) -> Vec<(&str, &str)> {
 fn solve_part_1() {
     let mut score = 0;
 
-    for line in read_tuples(&fs::read_to_string("input").expect(FILE_ERR)) {
+    for line in parse_tuples(&fs::read_to_string("input").expect(FILE_ERR)) {
         // convert to numbers
         let move1 = match &line {
             ("A", _) => 1,
@@ -57,7 +57,7 @@ fn solve_part_1() {
 fn solve_part_2() {
     let mut score = 0;
 
-    for line in read_tuples(&fs::read_to_string("input").expect(FILE_ERR)) {
+    for line in parse_tuples(&fs::read_to_string("input").expect(FILE_ERR)) {
         // convert to numbers
         let move1 = match &line {
             ("A", _) => 1,

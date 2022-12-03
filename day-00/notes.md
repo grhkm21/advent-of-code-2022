@@ -10,7 +10,7 @@ Create new Rust project by `cargo new <project-name>`. This will create director
 
 To build the project, navigate to the project root and run `cargo run`.
 
-### Rust code (!)
+### Rust code
 
 Import items using `use ...`, such as `use std::fs` and `use std::env`.
 
@@ -36,8 +36,6 @@ Of course, Rust supports dynamic size data structures such as `Vec`. It is defin
 
 ## Day 2
 
-### Rust code (!)
-
 In today's code, I also used the `match` syntax from before, this time to unpack / map values. For example, if we know the variable `vec: Vec<usize>` is of length 2, then we can unpack it into two `usize` variables `a` and `b` by writing
 
 ```rust
@@ -56,3 +54,15 @@ fn enhance(mut pixels: Vec<Vec<usize>>, r: usize, c: usize) -> Vec<Vec<usize>> {
 ```
 
 Other than that, the syntax required for today's problem is not too advanced.
+
+## Day 3
+
+In today's code, I had to implement finding common elements between two strings. At first, I tried something like
+
+```rust
+fn intersect(s1: &str, s2: &str) -> impl Iterator<Type = Char> {
+    s1.chars().filter(|c| s2.contains(&c.to_string()))
+}
+```
+
+However, I run into lifetime issues. I have not had time to fully understand what lifetime is yet, but **TODO: FILL THIS IN**
