@@ -60,9 +60,41 @@ Other than that, the syntax required for today's problem is not too advanced.
 In today's code, I had to implement finding common elements between two strings. At first, I tried something like
 
 ```rust
-fn intersect(s1: &str, s2: &str) -> impl Iterator<Type = Char> {
+fn intersect(s1: str, s2: str) -> impl Iterator<Item = char> {
     s1.chars().filter(|c| s2.contains(&c.to_string()))
 }
 ```
 
-However, I run into lifetime issues. I have not had time to fully understand what lifetime is yet, but **TODO: FILL THIS IN**
+However, I run into lifetime issues. I have not had time to fully understand what lifetime is yet, but essentially currently, `s1.chars` is tied to `s1`. Since `.filter` returns an iterator that points into `s1.chars()`, this causes an issue as the compiler does not know when the memory location at `&s1` will be invalidated. Therefore, we have to specify the _lifetime_ of the objects, which tells the compiler how long the objects should live for i.e. how long they will stay valid. There are two basic syntaxes for lifetime: `'_` and `'a`, where the former is essentially an anonymous / generic form of the latter. Therefore, we can fix the code above by writing
+
+```rust
+fn intersect<'a>(s1: &'a str, s2: &'a str) -> impl Iterator<Item = char> + 'a {
+    s1.chars().filter(|c| s2.contains(&c.to_string()))
+}
+```
+
+Also, note that this problem goes away by converting the iterator into a collectable via `.collect()`, since it essentially clones each object, so the lifetime of the objects in the collectable is tied to the collectable instead.
+
+By the way, the `intersect` function above is not used in the final solution, as part 2 requires intersecting 3 strings, so I figured out that it is probably easier to write a function with signature `fn intersect(v1: Vec<char>, s2: Vec<char>) -> Vec<char>`.
+
+## Day 4
+
+Today's problem is straightforward, but I learned quite a lot of features from Rust. Firstly, I created a `struct Interval` to wrap the endpoints of an interval in a nice data structure. In Rust, it is not possible to define object constructors, as everything should be "explicit". Therefore, I also created a `make_interval` function for that.
+
+Next, I had to check whether an interval covers another intervals entirely, which involves swapping the intervals when the left endpoints are not sorted. This functionality is implemented in `std::mem::swap`. However, due to the "assign once only" property of Rust variables, I have to pass in mutable pointers into the functions instead. The code looks like this in the end:
+
+```rust
+fn cover_entire(x: &mut Interval, y: &mut Interval) -> bool {
+    // [1, 4] -> [1, 2], [2, 3] but not [2, 5]
+    if x.l > y.l {
+        mem::swap(x, y);
+    }
+    (x.l == y.l) || (x.r >= y.r)
+}
+
+// ...
+
+cnt += cover_entire(&mut interval1, &mut interval2) as usize;
+```
+
+Also since `std::mem` is part of the standard library, I did not have to modify the `Cargo.toml` file.
