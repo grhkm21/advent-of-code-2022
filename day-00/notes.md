@@ -98,3 +98,55 @@ cnt += cover_entire(&mut interval1, &mut interval2) as usize;
 ```
 
 Also since `std::mem` is part of the standard library, I did not have to modify the `Cargo.toml` file.
+
+## Day 5
+
+In today's code, I tried writing it in a way to minimize code repetition. This is because the only part that changes between the two parts is the order of which elements are placed onto the destination stack. Therefore, I created an `enum OperationOrder` and a function `fn solve(option: OperationOrder)` that computes the answer based on the given order. In particular, the only code that depends on the operation order is:
+
+```rust
+enum OperationOrder {
+    FIFO,
+    FILO,
+}
+
+// ...
+
+// tmp: VecDeque<char>
+let element = match option {
+    OperationOrder::FIFO => tmp.pop_front(),
+    OperationOrder::FILO => tmp.pop_back(),
+}
+```
+
+I also printed the "Part X" prompt directly, as it is implied by the operation order. To do so, I followed [this](https://users.rust-lang.org/t/how-can-i-implement-fmt-display-for-enum/24111/3) and implemented the `std::fmt::Display` trait for the enum as follows:
+
+```rust
+impl fmt::Display for OperationOrder {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match *self {
+            OperationOrder::FIFO => write!(f, "Part 1 (FIFO): "),
+            OperationOrder::FILO => write!(f, "Part 2 (FILO): "),
+        }
+    }
+}
+```
+
+Also, I believe some parts of the code could be made more efficient. For example, in this part of the code,
+
+```rust
+// moves: &str
+for line in moves.split("\n").collect::<Vec<_>>() {
+    let iter = line.split(" ").collect::<Vec<&str>>();
+    let args: Vec<usize> = match iter[..] {
+        [_, x, _, y, _, z] => [x, y, z]
+            .iter()
+            .map(|&c| c.parse().expect(INT_ERR))
+            .collect(),
+        _ => unreachable!(),
+    };
+
+    // ...
+}
+```
+
+There are a lot of conversion between iterators (result of `.split()`) and collectables (`Vec`). Also, it is probably inefficient to write `[x, y, z].iter().map(func).collect()`, as it is equivalent to `[func(x), func(y), func(z)]`. However, the definition of `func` here is quite long, and I am not sure whether "inlining" the definition into the code is a good idea.
