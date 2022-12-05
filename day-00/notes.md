@@ -150,3 +150,11 @@ for line in moves.split("\n").collect::<Vec<_>>() {
 ```
 
 There are a lot of conversion between iterators (result of `.split()`) and collectables (`Vec`). Also, it is probably inefficient to write `[x, y, z].iter().map(func).collect()`, as it is equivalent to `[func(x), func(y), func(z)]`. However, the definition of `func` here is quite long, and I am not sure whether "inlining" the definition into the code is a good idea.
+
+---
+
+## Day 5.5
+
+I have modified my solution for day 5 quite a bit. Firstly, I used `itertools::Itertools`, which includes an implementation of the trait `.next_tuple()` for `Iterator`s. This allows me to extract tuples directly after splitting the string, instead of matching `[_, x, _, y, _, z] => [x, y, z]` then matching it into tuple. In order to keep the "method apply chain" going (`l.split_whitespace().next_tuple().expect(...)`), I defined an `Applicable` trait for every type by `impl<T> Applicable for T`. This gives access to the method `.apply(f)`, where `f: Fn(Self) -> T` is a closure. This allows me to apply a closure in a sequential order, rather than wrapping everything in `f(...)`.
+
+Another change I have is replacing the `push_back` and `tmp: VecDeque<char>` with direct method calls to the vectors via `.truncate` and `.extend`.

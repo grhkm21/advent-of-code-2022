@@ -1,13 +1,14 @@
-use std::collections::VecDeque;
 use std::fmt;
 use std::fs;
 
-const INT_ERR: &str = "err: can't parse int";
-const POP_ERR: &str = "err: can't pop from data structure";
+use itertools::Itertools;
+
 const FILE_ERR: &str = "err: can't read file";
 const SPLIT_ERR: &str = "err: can't split string";
+const TUPLE_ERR: &str = "err: can't unpack tuple";
 
 // FIFO: stack, FILO: queue
+#[derive(PartialEq)]
 enum OperationOrder {
     FIFO,
     FILO,
@@ -22,65 +23,65 @@ impl fmt::Display for OperationOrder {
     }
 }
 
+trait Applicable {
+    fn apply<F, T2>(self, f: F) -> T2
+    where
+        F: Fn(Self) -> T2,
+        Self: Sized,
+    {
+        f(self)
+    }
+}
+
+impl<T> Applicable for T {}
+
 fn solve(option: OperationOrder) {
     let contents = fs::read_to_string("input").expect(FILE_ERR);
     let (diagram, moves) = contents.split_once("\n\n").expect(SPLIT_ERR);
-    let mut diagram_lines = diagram.split("\n").collect::<Vec<&str>>();
+    let mut diagram_lines = diagram.lines().collect::<Vec<_>>();
     diagram_lines.reverse();
 
-    // parse diagram into Vec<VecDeque<char>>
+    // parse diagram into Vec<Vec<char>>
     let cols = 9;
-    let mut rows = vec![VecDeque::<char>::new(); cols];
+    let mut rows = vec![Vec::<char>::new(); cols];
 
     for row in &diagram_lines[1..] {
+        let row = row.chars().collect::<Vec<_>>();
         for i in 0..cols {
-            let row = row.chars().collect::<Vec<_>>();
             let c = row[i * 4 + 1];
             if c != ' ' {
-                rows[i].push_back(c);
+                rows[i].push(c);
             }
         }
     }
+
+    // parse moves
+    let pw = |x: &str| x.parse::<usize>().unwrap();
+    let moves = moves.lines().map(|l| {
+        l.split_whitespace()
+            .next_tuple::<(_, _, _, _, _, _)>()
+            .expect(TUPLE_ERR)
+            .apply(|(_, x, _, y, _, z)| (pw(x), pw(y), pw(z)))
+    });
 
     // process moves, creating temporary queue
-    for line in moves.split("\n") {
-        let iter = line.split(" ").collect::<Vec<&str>>();
-        let args: Vec<usize> = match iter[..] {
-            [_, x, _, y, _, z] => [x, y, z]
-                .iter()
-                .map(|&c| c.parse().expect(INT_ERR))
-                .collect(),
-            _ => unreachable!(),
-        };
-
-        let (num, src, dest) = match args[..] {
-            [num, src, dest] => (num, src, dest),
-            _ => unreachable!(),
-        };
-
+    for (num, src_idx, dest_idx) in moves {
         // pop from [src] stack
-        let mut tmp = VecDeque::<char>::new();
-        for _ in 0..num {
-            let element = rows[src - 1].pop_back().expect(POP_ERR);
-            tmp.push_back(element);
+        let src = &mut rows[src_idx - 1];
+        let mut tmp = src[src.len() - num..].to_vec();
+
+        if option == OperationOrder::FIFO {
+            tmp.reverse();
         }
 
-        // perform operations in order specified
-        for _ in 0..num {
-            let element = match option {
-                OperationOrder::FIFO => tmp.pop_front(),
-                OperationOrder::FILO => tmp.pop_back(),
-            }
-            .expect(POP_ERR);
-            rows[dest - 1].push_back(element);
-        }
+        src.truncate(src.len() - num);
+        rows[dest_idx - 1].extend(tmp);
     }
 
-    print!("{}", option);
-    for row in rows {
-        print!("{}", row.back().expect(POP_ERR));
-    }
-    println!();
+    println!(
+        "{option}{}",
+        rows.into_iter().map(|r| r[r.len() - 1]).collect::<String>()
+    );
 }
 
 fn main() {
