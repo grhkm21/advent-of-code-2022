@@ -158,3 +158,19 @@ There are a lot of conversion between iterators (result of `.split()`) and colle
 I have modified my solution for day 5 quite a bit. Firstly, I used `itertools::Itertools`, which includes an implementation of the trait `.next_tuple()` for `Iterator`s. This allows me to extract tuples directly after splitting the string, instead of matching `[_, x, _, y, _, z] => [x, y, z]` then matching it into tuple. In order to keep the "method apply chain" going (`l.split_whitespace().next_tuple().expect(...)`), I defined an `Applicable` trait for every type by `impl<T> Applicable for T`. This gives access to the method `.apply(f)`, where `f: Fn(Self) -> T` is a closure. This allows me to apply a closure in a sequential order, rather than wrapping everything in `f(...)`.
 
 Another change I have is replacing the `push_back` and `tmp: VecDeque<char>` with direct method calls to the vectors via `.truncate` and `.extend`.
+
+---
+
+## Day 6
+
+Today's problem is a simple one - find the first index where `s[i:i + k]` contains distinct characters. I implemented an optimization where instead of moving the sliding window one index at a time, we shift it to after the first match. For example,
+
+```
+[d  a  b] b  c  a  -> no match
+
+ d [a  b  b] c  a  -> match! (relative) idx = 1
+       ^
+ d  a  b [b  c  a] -> distinct
+```
+
+We can skip to after `idx`, indicated by ^, because any window containing ^ must contain the character that matches with it, meaning the sliding window will contain duplicate characters.

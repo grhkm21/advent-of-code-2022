@@ -19,7 +19,7 @@ fn solve_part_1() {
             };
             cur_val += line_val;
         }
-        
+
         // update maximum
         // println!("player: {cur_val}");
         if max_val < cur_val {
