@@ -174,3 +174,11 @@ Today's problem is a simple one - find the first index where `s[i:i + k]` contai
 ```
 
 We can skip to after `idx`, indicated by ^, because any window containing ^ must contain the character that matches with it, meaning the sliding window will contain duplicate characters.
+
+---
+
+## Day 7
+
+LOL THIS TOOK ME 5 HOURS
+
+Short notes for now: I changed the structure of the code from two separate `solve_part_X()` functions into a single `Solver::solve()` function. Implemented a `Tree` structure that took surprisingly long, around 3 hours spent on both `.dfs` and getting `TreeNode` to include a `parent` field. Googled and realized it is not possible due to lifetime issues... Fixed `.dfs(&closure)` infinite recursion in compilation phase error by passing in the closure as a `&dyn`.

@@ -1,17 +1,14 @@
-struct Solver;
+struct Solver {
+    &str content;
+}
 
 trait Solvable {
-    fn solve_part_1(&self);
-    fn solve_part_2(&self);
+    fn solve(content: &str) -> (usize, usize);
 }
 
 impl Solvable for Solver {
-    fn solve_part_1(&self) {
-        println!("Part 1: 1234");
-    }
+    fn solve(content: &str) -> (usize, usize) {
 
-    fn solve_part_2(&self) {
-        println!("Part 2: wee");
     }
 }
 
