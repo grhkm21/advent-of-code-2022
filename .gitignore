@@ -1,4 +1,7 @@
-*/debug/
-*/target/
-*/Cargo.lock
+target/*
+Cargo.lock
+
 .vscode
+
+cookies
+session

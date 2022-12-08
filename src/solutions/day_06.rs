@@ -12,7 +12,7 @@ fn first_match(s: &str) -> Option<usize> {
     None
 }
 
-fn solve(s: &str, k: usize) -> Option<usize> {
+fn _solve(s: &str, k: usize) -> Option<usize> {
     // solves day-06, skipping forward to idx + 1 where idx is the first_match
     let n = s.len();
     let mut i = 0;
@@ -34,8 +34,8 @@ fn solve(s: &str, k: usize) -> Option<usize> {
     None
 }
 
-fn main() {
-    let s = include_str!("../input");
-    println!("Part 1: {}", solve(s, 4).expect("err: can't find index"));
-    println!("Part 2: {}", solve(s, 14).expect("err: can't find index"));
+pub fn solve(s: &str) -> (usize, usize) {
+    let part1 = _solve(s, 4).expect("err: can't find index for part 1");
+    let part2 = _solve(s, 14).expect("err: can't find index for part 2");
+    (part1, part2)
 }

@@ -1,8 +1,6 @@
-use std::fs;
 use std::mem;
 
 const INT_ERR: &str = "err: can't parse int";
-const FILE_ERR: &str = "err: can't read file";
 const SPLIT_ERR: &str = "err: splitting failed";
 
 struct Interval {
@@ -34,29 +32,19 @@ fn cover_partly(x: &mut Interval, y: &mut Interval) -> bool {
     x.r >= y.l
 }
 
-fn solve_part_1() {
-    let mut cnt = 0;
-    let content = fs::read_to_string("input").expect(FILE_ERR);
-    for line in content.lines().map(|s| s.split_once(",").expect(SPLIT_ERR)) {
+pub fn solve(contents: &str) -> (usize, usize) {
+    let mut cnt1 = 0;
+    let mut cnt2 = 0;
+
+    for line in contents
+        .lines()
+        .map(|s| s.split_once(",").expect(SPLIT_ERR))
+    {
         let mut interval1 = make_interval(line.0);
         let mut interval2 = make_interval(line.1);
-        cnt += cover_entire(&mut interval1, &mut interval2) as usize;
+        cnt1 += cover_entire(&mut interval1, &mut interval2) as usize;
+        cnt2 += cover_partly(&mut interval1, &mut interval2) as usize;
     }
-    println!("Part 1: {cnt}");
-}
 
-fn solve_part_2() {
-    let mut cnt = 0;
-    let content = fs::read_to_string("input").expect(FILE_ERR);
-    for line in content.lines().map(|s| s.split_once(",").expect(SPLIT_ERR)) {
-        let mut interval1 = make_interval(line.0);
-        let mut interval2 = make_interval(line.1);
-        cnt += cover_partly(&mut interval1, &mut interval2) as usize;
-    }
-    println!("Part 2: {cnt}");
-}
-
-fn main() {
-    solve_part_1();
-    solve_part_2();
+    (cnt1, cnt2)
 }

@@ -1,7 +1,3 @@
-use std::fs;
-
-const FILE_ERR: &str = "err: can't read file";
-
 fn round(move1: usize, move2: usize) -> usize {
     // returns score based on whether move2 beats move1
     return match [move1, move2] {
@@ -25,10 +21,11 @@ fn parse_tuples(from: &str) -> Vec<(&str, &str)> {
         .collect()
 }
 
-fn solve_part_1() {
-    let mut score = 0;
+pub fn solve(contents: &str) -> (usize, usize) {
+    let mut part1 = 0;
+    let mut part2 = 0;
 
-    for line in parse_tuples(&fs::read_to_string("input").expect(FILE_ERR)) {
+    for line in parse_tuples(contents) {
         // convert to numbers
         let move1 = match &line {
             ("A", _) => 1,
@@ -44,28 +41,6 @@ fn solve_part_1() {
             _ => unreachable!(),
         };
 
-        // first add shape selected
-        score += move2;
-
-        // next add outcome of the round
-        score += round(move1, move2);
-    }
-
-    println!("Part 1: {score}");
-}
-
-fn solve_part_2() {
-    let mut score = 0;
-
-    for line in parse_tuples(&fs::read_to_string("input").expect(FILE_ERR)) {
-        // convert to numbers
-        let move1 = match &line {
-            ("A", _) => 1,
-            ("B", _) => 2,
-            ("C", _) => 3,
-            _ => unreachable!(),
-        };
-
         let target_round = match &line {
             (_, "X") => 0,
             (_, "Y") => 3,
@@ -73,22 +48,25 @@ fn solve_part_2() {
             _ => unreachable!(),
         };
 
-        // we check all moves and see if we get our required results
+        // part 1: first add shape selected
+        part1 += move2;
+
+        // part 1: next add outcome of the round
+        part1 += round(move1, move2);
+
+        // part 2: we check all moves and see if we get our required results
         for move2 in 1..4 {
             if round(move1, move2) == target_round {
                 // first add shape selected
-                score += move2;
+                part2 += move2;
 
                 // next add outcome of the round
-                score += round(move1, move2);
+                part2 += round(move1, move2);
+
+                break;
             }
         }
     }
 
-    println!("Part 2: {score}");
-}
-
-fn main() {
-    solve_part_1();
-    solve_part_2();
+    (part1, part2)
 }

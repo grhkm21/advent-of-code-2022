@@ -1,9 +1,7 @@
 use std::fmt;
-use std::fs;
 
 use itertools::Itertools;
 
-const FILE_ERR: &str = "err: can't read file";
 const SPLIT_ERR: &str = "err: can't split string";
 const TUPLE_ERR: &str = "err: can't unpack tuple";
 
@@ -35,8 +33,7 @@ trait Applicable {
 
 impl<T> Applicable for T {}
 
-fn solve(option: OperationOrder) {
-    let contents = fs::read_to_string("input").expect(FILE_ERR);
+fn _solve(contents: &str, option: OperationOrder) -> String {
     let (diagram, moves) = contents.split_once("\n\n").expect(SPLIT_ERR);
     let mut diagram_lines = diagram.lines().collect::<Vec<_>>();
     diagram_lines.reverse();
@@ -78,13 +75,11 @@ fn solve(option: OperationOrder) {
         rows[dest_idx - 1].extend(tmp);
     }
 
-    println!(
-        "{option}{}",
-        rows.into_iter().map(|r| r[r.len() - 1]).collect::<String>()
-    );
+    rows.into_iter().map(|r| r[r.len() - 1]).collect::<String>()
 }
 
-fn main() {
-    solve(OperationOrder::FIFO);
-    solve(OperationOrder::FILO);
+pub fn solve(contents: &str) -> (String, String) {
+    let part1 = _solve(contents, OperationOrder::FIFO);
+    let part2 = _solve(contents, OperationOrder::FILO);
+    (part1, part2)
 }
