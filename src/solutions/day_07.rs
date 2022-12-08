@@ -1,5 +1,4 @@
 use std::cell::UnsafeCell;
-// use std::collections::HashSet;
 use std::default::Default;
 use std::fmt::Debug;
 use std::ops::Add;
@@ -14,7 +13,7 @@ where
     T: NodeValTrait<T>,
 {
     val: Option<T>,
-    _name: &'a str,
+    name: &'a str,
     edges: UnsafeCell<Vec<&'a Node<'a, T>>>,
 }
 
@@ -22,17 +21,28 @@ impl<'a, T> Node<'a, T>
 where
     T: NodeValTrait<T>,
 {
-    fn new<'b>(val: Option<T>, _name: &'b str, arena: &'b Arena<Node<'b, T>>) -> &'b Node<'b, T> {
+    fn new<'b>(val: Option<T>, name: &'b str, arena: &'b Arena<Node<'b, T>>) -> &'b Node<'b, T> {
         arena.alloc(Node {
             val,
-            _name,
+            name,
             edges: UnsafeCell::new(Vec::new()),
         })
     }
 
-    unsafe fn push(&'a self, node: &'a Node<'a, T>) {
+    fn push(&'a self, node: &'a Node<'a, T>) {
         unsafe {
             (*self.edges.get()).push(node);
+        }
+    }
+
+    fn find_name<'b>(&'a self, name: &'b str) -> Option<&'a Node<'a, T>> {
+        unsafe {
+            for node in &(*self.edges.get()) {
+                if node.name == name {
+                    return Some(node);
+                }
+            }
+            None
         }
     }
 
@@ -64,11 +74,8 @@ where
     }
 }
 
-fn init<'a>(
-    arena: &'a Arena<Node<'a, usize>>,
-    cur_path: &'a mut Vec<&'a Node<'a, usize>>,
-    contents: &'a str,
-) -> &'a Node<'a, usize> {
+fn init<'a>(arena: &'a Arena<Node<'a, usize>>, contents: &'a str) -> &'a Node<'a, usize> {
+    let cur_path: &mut Vec<&'a Node<'a, usize>> = &mut Vec::new();
     cur_path.clear();
     let root = Node::new(None, "/", arena);
     cur_path.push(root);
@@ -90,7 +97,8 @@ fn init<'a>(
                         .expect(&format!("err: can't split {:?}", output));
 
                     // assume node is new
-                    let cur = cur_path.last().expect("err: cur_path is empty");
+                    let cur = cur_path[cur_path.len() - 1];
+
                     let val = match data {
                         "dir" => None,
                         data => {
@@ -101,9 +109,14 @@ fn init<'a>(
                         }
                     };
 
-                    let node = Node::new(val, dir, arena);
-                    unsafe {
-                        cur.push(node);
+                    match cur.find_name(dir) {
+                        Some(_) => {
+                            todo!()
+                        }
+                        None => {
+                            let node = Node::new(val, dir, arena);
+                            cur.push(node);
+                        }
                     }
                 }
             }
@@ -116,11 +129,15 @@ fn init<'a>(
             }
             ("cd", dir) => {
                 // assume node is new
-                let cur = cur_path.last().expect("err: cur_path is empty");
-                let node = Node::new(None, dir, arena);
-                unsafe {
-                    cur.push(node);
-                }
+                let cur = cur_path[cur_path.len() - 1];
+                let node = match cur.find_name(dir) {
+                    None => {
+                        let node = Node::new(None, dir, arena);
+                        cur.push(node);
+                        node
+                    }
+                    Some(node) => node,
+                };
                 cur_path.push(node);
             }
             _ => unreachable!(),
@@ -131,10 +148,9 @@ fn init<'a>(
 
 pub fn solve(contents: &str) -> (usize, usize) {
     let arena = Arena::new();
-    let mut cur_path = Vec::new();
 
     // construct graph
-    let g = init(&arena, &mut cur_path, contents);
+    let g = init(&arena, contents);
     let res = g
         .traverse(&|v| {
             // println!("{:?} -> {:?}", v, v.sum());
