@@ -1,139 +1,157 @@
-use std::cell::RefCell;
+use std::cell::UnsafeCell;
+// use std::collections::HashSet;
 use std::default::Default;
 use std::fmt::Debug;
 use std::ops::Add;
-use std::rc::Rc;
-
-const ITER_ERR: &str = "err: iterator is empty";
-const PARSE_ERR: &str = "err: can't parse int";
-const SPLIT_ERR: &str = "err: can't split string";
+use typed_arena::Arena;
 
 // Blanket implementation
-trait NodeValTrait<T>: Add<Output = T> + Default + Copy + Debug {}
-
-impl<T> NodeValTrait<T> for T where T: Add<Output = T> + Default + Copy + Debug {}
+trait NodeValTrait<T> = Add<Output = T> + Default + Copy + Debug;
 
 #[derive(Debug)]
-struct TreeNode<T: NodeValTrait<T>> {
+struct Node<'a, T>
+where
+    T: NodeValTrait<T>,
+{
     val: Option<T>,
-    name: String,
-    children: Vec<Rc<RefCell<TreeNode<T>>>>,
+    _name: &'a str,
+    edges: UnsafeCell<Vec<&'a Node<'a, T>>>,
 }
 
-impl<T: NodeValTrait<T>> TreeNode<T> {
-    fn new(s: impl ToString) -> TreeNode<T> {
-        TreeNode {
-            val: None,
-            name: s.to_string(),
-            children: Vec::new(),
+impl<'a, T> Node<'a, T>
+where
+    T: NodeValTrait<T>,
+{
+    fn new<'b>(val: Option<T>, _name: &'b str, arena: &'b Arena<Node<'b, T>>) -> &'b Node<'b, T> {
+        arena.alloc(Node {
+            val,
+            _name,
+            edges: UnsafeCell::new(Vec::new()),
+        })
+    }
+
+    unsafe fn push(&'a self, node: &'a Node<'a, T>) {
+        unsafe {
+            (*self.edges.get()).push(node);
         }
-    }
-
-    fn val(&mut self, val: T) {
-        self.val = Some(val);
-    }
-
-    fn push(&mut self, node: TreeNode<T>) {
-        self.children.push(Rc::new(RefCell::new(node)));
-    }
-
-    fn insert_and_find(&mut self, name: impl ToString) -> Rc<RefCell<TreeNode<T>>> {
-        let name = name.to_string();
-        for child in &self.children {
-            if child.borrow().name == name {
-                return Rc::clone(child);
-            }
-        }
-        let child = TreeNode::new(name);
-        self.push(child);
-        Rc::clone(&self.children[&self.children.len() - 1])
     }
 
     fn sum(&self) -> T {
-        let mut res: T = Default::default();
-        if let Some(val) = &self.val {
-            res = res + *val;
+        let mut res = Default::default();
+        if let Some(val) = self.val {
+            res = res + val;
         }
-        for child in &self.children {
-            res = res + child.borrow().sum();
+        unsafe {
+            for node in &(*self.edges.get()) {
+                res = res + node.sum();
+            }
         }
         res
     }
 
-    fn dfs<F, T2>(&self, f: F) -> Vec<T2>
+    fn traverse<F, F2>(&self, f: &F) -> Vec<F2>
     where
-        F: Fn(&TreeNode<T>) -> T2,
+        F: Fn(&Self) -> F2,
     {
         let mut res = Vec::new();
         res.push(f(self));
-        for child in &self.children {
-            // workaround for infinite recursion
-            let f = &f as &dyn Fn(&TreeNode<T>) -> T2;
-            res.extend(child.borrow_mut().dfs(f));
+        unsafe {
+            for n in &(*self.edges.get()) {
+                res.extend(n.traverse(f));
+            }
         }
         res
     }
 }
 
-pub fn solve(contents: &str) -> (usize, usize) {
-    let root: Rc<RefCell<TreeNode<usize>>> = Rc::new(RefCell::new(TreeNode::new("")));
-    let mut cur_path = Vec::new();
-    cur_path.push(Rc::clone(&root));
+fn init<'a>(
+    arena: &'a Arena<Node<'a, usize>>,
+    cur_path: &'a mut Vec<&'a Node<'a, usize>>,
+    contents: &'a str,
+) -> &'a Node<'a, usize> {
+    cur_path.clear();
+    let root = Node::new(None, "/", arena);
+    cur_path.push(root);
 
-    // each $ represents new command input / output group
-    for cmds in contents.split("$ ") {
-        let cur = &cur_path[cur_path.len() - 1];
-        let lines: Vec<&str> = cmds.trim().lines().collect();
-        if lines.is_empty() {
+    for cmd_group in contents.split("$ ") {
+        let cmd_group: Vec<&str> = cmd_group.trim().lines().collect();
+        if cmd_group.is_empty() {
             continue;
         }
 
-        // process each group of commands
-        let cmd: Vec<&str> = lines[0].split(" ").collect();
-        if cmd[0] == "ls" {
-            for &line in &lines[1..] {
-                let (prefix, dir) = line.split_once(" ").expect(SPLIT_ERR);
-                let child = cur.borrow_mut().insert_and_find(dir);
-                match prefix {
-                    "dir" => {
-                        cur.borrow_mut().insert_and_find(dir);
-                    }
-                    _ => {
-                        let prefix = prefix.parse().expect(PARSE_ERR);
-                        child.borrow_mut().val(prefix);
+        let cmd = cmd_group[0]
+            .split_once(" ")
+            .unwrap_or_else(|| (cmd_group[0], ""));
+        match cmd {
+            ("ls", "") => {
+                for output in &cmd_group[1..] {
+                    let (data, dir) = output
+                        .split_once(" ")
+                        .expect(&format!("err: can't split {:?}", output));
+
+                    // assume node is new
+                    let cur = cur_path.last().expect("err: cur_path is empty");
+                    let val = match data {
+                        "dir" => None,
+                        data => {
+                            let val = data
+                                .parse()
+                                .expect(&format!("err: can't parse {data:?} to int"));
+                            Some(val)
+                        }
+                    };
+
+                    let node = Node::new(val, dir, arena);
+                    unsafe {
+                        cur.push(node);
                     }
                 }
             }
-        } else {
-            match cmd[1] {
-                ".." => {
-                    cur_path.pop();
-                }
-                dir => {
-                    let child = cur.borrow_mut().insert_and_find(dir);
-                    cur_path.push(child);
-                }
+            ("cd", "..") => {
+                cur_path.pop();
             }
+            ("cd", "/") => {
+                cur_path.clear();
+                cur_path.push(root);
+            }
+            ("cd", dir) => {
+                // assume node is new
+                let cur = cur_path.last().expect("err: cur_path is empty");
+                let node = Node::new(None, dir, arena);
+                unsafe {
+                    cur.push(node);
+                }
+                cur_path.push(node);
+            }
+            _ => unreachable!(),
         }
     }
+    root
+}
 
-    let func = |node: &TreeNode<usize>| (node.val.is_some(), node.sum());
-    let binding = root.borrow_mut().dfs(func);
-    let vals = binding
+pub fn solve(contents: &str) -> (usize, usize) {
+    let arena = Arena::new();
+    let mut cur_path = Vec::new();
+
+    // construct graph
+    let g = init(&arena, &mut cur_path, contents);
+    let res = g
+        .traverse(&|v| {
+            // println!("{:?} -> {:?}", v, v.sum());
+            (v.val.is_none(), v.sum())
+        })
         .iter()
-        .filter(|(is_file, _)| !is_file)
-        .map(|(_, sum)| sum);
+        .filter(|(is_dir, _)| *is_dir)
+        .map(|(_, sum)| *sum)
+        .collect::<Vec<_>>();
 
-    // part 1
-    let part1 = vals.clone().filter(|&sum| *sum <= 100000).sum();
-
-    // part 2
-    let freeup = root.borrow_mut().sum() - 40000000;
-    let part2 = vals
-        .clone()
-        .filter(|&sum| *sum >= freeup)
+    let sum: usize = g.sum();
+    let part1: usize = res.iter().filter(|&&s| s <= 100000).sum();
+    let part2: usize = *res
+        .iter()
+        .filter(|&&s| s >= sum - 40000000)
         .min()
-        .expect(ITER_ERR);
+        .expect("err: no files can be freed");
 
-    (part1, *part2)
+    (part1, part2)
 }
