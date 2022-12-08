@@ -1,5 +1,4 @@
 use itertools::Itertools;
-use std::ops::Mul;
 
 pub fn parse_board(contents: &str) -> Vec<Vec<usize>> {
     let mut res = Vec::new();
@@ -15,26 +14,6 @@ pub fn parse_board(contents: &str) -> Vec<Vec<usize>> {
         )
     }
     res
-}
-
-trait CanAny {
-    fn any(self) -> bool;
-}
-
-trait CanProduct<T> {
-    fn prod(&mut self) -> T;
-}
-
-impl CanAny for [bool; 4] {
-    fn any(self) -> bool {
-        self[0] || self[1] || self[2] || self[3]
-    }
-}
-
-impl<T: Copy + Mul<Output = T>> CanProduct<T> for [T; 4] {
-    fn prod(&mut self) -> T {
-        self[0] * self[1] * self[2] * self[3]
-    }
 }
 
 pub fn solve(contents: &str) -> (usize, usize) {
@@ -58,40 +37,36 @@ pub fn solve(contents: &str) -> (usize, usize) {
     const DIRS: [(isize, isize); 4] = [(-1, 0), (1, 0), (0, -1), (0, 1)];
     let dirs = (0..r)
         .cartesian_product(0..c)
-        .map(|(x, y)| DIRS.map(|(dx, dy)| look_dir(x as isize, y as isize, dx, dy)))
-        .collect::<Vec<[Vec<_>; 4]>>();
+        .map(|(x, y)| DIRS.map(|(dx, dy)| look_dir(x as isize, y as isize, dx, dy)));
 
-    let part1 = dirs
-        .iter()
-        .map(|arr| {
-            arr.clone()
-                .map(|v| v[0] > *v[1..].iter().max().unwrap_or(&-20))
-                .any()
-        })
-        .map(|v: bool| v as usize)
-        .sum();
-
-    // up down right left
-    let part2 = dirs
-        .iter()
-        .map(|arr| {
-            arr.clone()
-                .map(|v| {
-                    (v.len(), {
-                        (1..v.len())
-                            .filter(move |&i| v[0] <= v[i])
-                            .collect::<Vec<_>>()
-                    })
-                })
-                .map(|(len, v)| match v[..] {
-                    [] => len - 1,
-                    [x, ..] => x,
-                })
-                .prod()
-        })
-        .map(|v: usize| v as usize)
-        .max()
-        .unwrap();
+    let mut part1 = 0;
+    let mut part2 = 0;
+    for views in dirs.clone() {
+        let mut viewable = false;
+        let mut view_prod = 1;
+        for dir_vals in views {
+            let mut cur_viewable = true;
+            let len = dir_vals.len();
+            let mut dist = None;
+            for i in 1..len {
+                // compute if dir_vals is viewable from the sidee
+                // and the view distance, which can be checked by
+                // checking whether dir_vals[0] is strictly greater than heights
+                if dir_vals[0] <= dir_vals[i] {
+                    cur_viewable = false;
+                    dist = Some(dist.unwrap_or(i));
+                }
+            }
+            if cur_viewable {
+                viewable |= cur_viewable;
+            }
+            view_prod *= dist.unwrap_or(len - 1);
+        }
+        if viewable {
+            part1 += 1;
+        }
+        part2 = part2.max(view_prod);
+    }
 
     (part1, part2)
 }
