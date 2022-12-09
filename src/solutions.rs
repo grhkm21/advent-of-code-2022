@@ -7,28 +7,29 @@ pub mod day_05;
 pub mod day_06;
 pub mod day_07;
 pub mod day_08;
+pub mod day_09;
 
-enum SolverType {
+pub enum SolverType {
     Integer,
     String,
 }
 
-pub static DAYS: usize = 9;
+pub const DAYS: usize = 10;
+pub const SOLS: [(*const (), SolverType); DAYS] = [
+    (day_00::solve as *const (), SolverType::Integer),
+    (day_01::solve as *const (), SolverType::Integer),
+    (day_02::solve as *const (), SolverType::Integer),
+    (day_03::solve as *const (), SolverType::Integer),
+    (day_04::solve as *const (), SolverType::Integer),
+    (day_05::solve as *const (), SolverType::String),
+    (day_06::solve as *const (), SolverType::Integer),
+    (day_07::solve as *const (), SolverType::Integer),
+    (day_08::solve as *const (), SolverType::Integer),
+    (day_09::solve as *const (), SolverType::Integer),
+];
 
 pub unsafe fn solve(contents: &str, day: usize) -> (String, String) {
-    let sols: [(*const (), SolverType); 9] = [
-        (day_00::solve as *const (), SolverType::Integer),
-        (day_01::solve as *const (), SolverType::Integer),
-        (day_02::solve as *const (), SolverType::Integer),
-        (day_03::solve as *const (), SolverType::Integer),
-        (day_04::solve as *const (), SolverType::Integer),
-        (day_05::solve as *const (), SolverType::String),
-        (day_06::solve as *const (), SolverType::Integer),
-        (day_07::solve as *const (), SolverType::Integer),
-        (day_08::solve as *const (), SolverType::Integer),
-    ];
-
-    let (solver, solver_type) = &sols[day];
+    let (solver, solver_type) = &SOLS[day];
 
     let (part1, part2): (String, String) = unsafe {
         match solver_type {

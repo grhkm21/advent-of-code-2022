@@ -12,3 +12,4 @@ tokio = { version = "1", features = ["full"] }
 futures = "0.3"
 typed-arena = "2.0.1"
 rand = "0.8.5"
+regex = "1.7.0"

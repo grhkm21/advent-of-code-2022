@@ -1,6 +1,7 @@
 #![feature(trait_alias)]
 #![feature(downcast_unchecked)]
 #![feature(box_into_inner)]
+#![feature(let_chains)]
 
 use std::env;
 use std::fs;
@@ -53,4 +54,14 @@ fn main() {
     let contents = fs::read_to_string(input_file_path).expect("file");
     let (part1, part2) = unsafe { solutions::solve(&contents, day) };
     println!("Part 1: {}, Part 2: {}", part1, part2);
+
+    // Submit answers
+    let env_submit = env::var("SUBMIT");
+    if let Ok(env_submit) = env_submit {
+        if env_submit.starts_with("1") {
+            fetcher::submit(day, part1.to_string(), 1, 2022);
+        } else if env_submit.starts_with("2") {
+            fetcher::submit(day, part1.to_string(), 2, 2022);
+        }
+    }
 }
