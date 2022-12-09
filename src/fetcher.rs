@@ -97,7 +97,7 @@ pub async fn submit(day: usize, answer: String, level: usize, year: usize) {
         .to_string();
 
     // parse response body, wrapped in <main></main>
-    let re = Regex::new(r"<main>\n(.*)\n</main>").unwrap();
+    let re = Regex::new(r"<main>((.|\n)*)</main>").unwrap();
     if let Some(captures) = re.captures(&body) {
         body = captures.get(1).unwrap().as_str().to_string();
     }

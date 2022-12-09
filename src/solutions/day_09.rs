@@ -1,6 +1,33 @@
 use std::collections::HashSet;
+use std::ops::{Add, Sub};
 
-pub fn sgn(x: i32) -> i32 {
+#[derive(Copy, Clone, Eq, Hash, PartialEq)]
+struct Pos {
+    x: i32,
+    y: i32,
+}
+
+impl Pos {
+    fn new(x: i32, y: i32) -> Pos {
+        Pos { x: x, y: y }
+    }
+}
+
+impl Add<Pos> for Pos {
+    type Output = Pos;
+    fn add(self, pt: Pos) -> Pos {
+        Pos::new(pt.x + self.x, pt.y + self.y)
+    }
+}
+
+impl Sub<Pos> for Pos {
+    type Output = Pos;
+    fn sub(self, pt: Pos) -> Pos {
+        Pos::new(pt.x - self.x, pt.y - self.y)
+    }
+}
+
+fn sgn(x: i32) -> i32 {
     if x > 0 {
         return 1;
     }
@@ -10,61 +37,58 @@ pub fn sgn(x: i32) -> i32 {
     0
 }
 
-pub fn get_dir(dir: &str) -> (i32, i32) {
+fn get_dir(dir: &str) -> Pos {
     return match dir {
-        "R" => (1, 0),
-        "L" => (-1, 0),
-        "U" => (0, 1),
-        "D" => (0, -1),
+        "R" => Pos::new(1, 0),
+        "L" => Pos::new(-1, 0),
+        "U" => Pos::new(0, 1),
+        "D" => Pos::new(0, -1),
         _ => unreachable!(),
     };
 }
 
-pub fn pull(head_x: i32, head_y: i32, tail_x: i32, tail_y: i32) -> (i32, i32) {
-    // returns (dx, dy) indicating where tail should move
-    let dx;
-    let dy;
-
+fn pull(head: Pos, tail: Pos) -> Pos {
     // If close enough, don't move
     // Otherwise, pull in whichever direction changes
-    if (head_x - tail_x).abs() <= 1 && (head_y - tail_y).abs() <= 1 {
-        dx = 0;
-        dy = 0;
+    let mut dir = tail - head;
+    if dir.x.abs() <= 1 && dir.y.abs() <= 1 {
+        dir = Pos::new(0, 0);
     } else {
-        dx = sgn(head_x - tail_x);
-        dy = sgn(head_y - tail_y);
+        // whichever direction changes, move that way
+        dir.x = sgn(dir.x);
+        dir.y = sgn(dir.y);
     }
-    // whichever direction changes, move that way
-    (tail_x + dx, tail_y + dy)
+    tail + dir
 }
 
-pub fn solve(contents: &str) -> (usize, usize) {
-    let mut head_x: i32 = 0;
-    let mut head_y: i32 = 0;
-    let mut tail_x: i32 = 0;
-    let mut tail_y: i32 = 0;
+fn simulate(chains: usize, contents: &str) -> usize {
+    let mut vis: HashSet<Pos> = HashSet::new();
+    let mut chain_pos: Vec<Pos> = vec![Pos::new(0, 0); chains];
 
-    let mut vis: HashSet<(i32, i32)> = HashSet::new();
-    vis.insert((0, 0));
-
+    vis.insert(chain_pos[chains - 1]);
     for line in contents.split("\n") {
         if let Some((dir, len)) = line.split_once(" ") {
             let len = len
                 .parse::<isize>()
                 .expect("err: Failed to parse int {len}");
-            let (dx, dy) = get_dir(dir);
             for _ in 0..len {
-                head_x += dx;
-                head_y += dy;
-                (tail_x, tail_y) = pull(head_x, head_y, tail_x, tail_y);
-                vis.insert((tail_x, tail_y));
+                chain_pos[0] = chain_pos[0] + get_dir(dir);
+                for i in 1..chains {
+                    chain_pos[i] = pull(chain_pos[i - 1], chain_pos[i]);
+                }
+                vis.insert(chain_pos[chains - 1]);
             }
         } else {
             panic!("err: Failed to read line {line}");
         }
     }
 
-    let part1 = vis.len();
+    vis.len()
+}
 
-    (part1, 0)
+pub fn solve(contents: &str) -> (usize, usize) {
+    let part1 = simulate(2, contents);
+    let part2 = simulate(10, contents);
+
+    (part1, part2)
 }

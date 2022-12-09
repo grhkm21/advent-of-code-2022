@@ -61,7 +61,7 @@ fn main() {
         if env_submit.starts_with("1") {
             fetcher::submit(day, part1.to_string(), 1, 2022);
         } else if env_submit.starts_with("2") {
-            fetcher::submit(day, part1.to_string(), 2, 2022);
+            fetcher::submit(day, part2.to_string(), 2, 2022);
         }
     }
 }
