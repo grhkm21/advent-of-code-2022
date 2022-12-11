@@ -1,7 +1,3 @@
-pub struct Solver {
-    content: String,
-}
-
-pub trait Solvable {
-    fn solve(self) -> (usize, usize);
+fn solve(contents: &str) -> (usize, usize) {
+    (0, 0)
 }

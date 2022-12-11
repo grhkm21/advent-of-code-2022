@@ -8,13 +8,17 @@ pub mod day_06;
 pub mod day_07;
 pub mod day_08;
 pub mod day_09;
+pub mod day_10;
+pub mod day_11;
 
+#[allow(dead_code)]
 pub enum SolverType {
+    BigInteger,
     Integer,
     String,
 }
 
-pub const DAYS: usize = 9;
+pub const DAYS: usize = 11;
 pub const SOLS: [(*const (), SolverType); DAYS + 1] = [
     (day_00::solve as *const (), SolverType::Integer),
     (day_01::solve as *const (), SolverType::Integer),
@@ -26,6 +30,8 @@ pub const SOLS: [(*const (), SolverType); DAYS + 1] = [
     (day_07::solve as *const (), SolverType::Integer),
     (day_08::solve as *const (), SolverType::Integer),
     (day_09::solve as *const (), SolverType::Integer),
+    (day_10::solve as *const (), SolverType::String),
+    (day_11::solve as *const (), SolverType::Integer),
 ];
 
 pub fn solve(contents: &str, day: usize) -> (String, String) {
@@ -33,6 +39,13 @@ pub fn solve(contents: &str, day: usize) -> (String, String) {
 
     let (part1, part2): (String, String) = unsafe {
         match solver_type {
+            SolverType::BigInteger => {
+                use num_bigint::BigUint;
+                let code =
+                    std::mem::transmute::<&*const (), &fn(&str) -> (BigUint, BigUint)>(solver);
+                let (part1, part2) = code(contents);
+                (part1.to_string(), part2.to_string())
+            }
             SolverType::Integer => {
                 let code = std::mem::transmute::<&*const (), &fn(&str) -> (usize, usize)>(solver);
                 let (part1, part2) = code(contents);

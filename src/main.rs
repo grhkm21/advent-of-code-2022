@@ -39,8 +39,9 @@ fn run_day_solution(day: usize) {
 
     println!("Running solution for Day #{:02}!", day);
 
-    let contents = fs::read_to_string(input_file_path).expect("file");
+    let contents = fs::read_to_string(input_file_path).unwrap();
     let (part1, part2) = solutions::solve(&contents, day);
+    println!("?");
     println!("Part 1: {}, Part 2: {}", part1, part2);
 
     // Submit answers
