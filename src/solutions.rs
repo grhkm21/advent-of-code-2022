@@ -14,8 +14,8 @@ pub enum SolverType {
     String,
 }
 
-pub const DAYS: usize = 10;
-pub const SOLS: [(*const (), SolverType); DAYS] = [
+pub const DAYS: usize = 9;
+pub const SOLS: [(*const (), SolverType); DAYS + 1] = [
     (day_00::solve as *const (), SolverType::Integer),
     (day_01::solve as *const (), SolverType::Integer),
     (day_02::solve as *const (), SolverType::Integer),
@@ -28,7 +28,7 @@ pub const SOLS: [(*const (), SolverType); DAYS] = [
     (day_09::solve as *const (), SolverType::Integer),
 ];
 
-pub unsafe fn solve(contents: &str, day: usize) -> (String, String) {
+pub fn solve(contents: &str, day: usize) -> (String, String) {
     let (solver, solver_type) = &SOLS[day];
 
     let (part1, part2): (String, String) = unsafe {

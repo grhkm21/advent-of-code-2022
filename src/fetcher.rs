@@ -44,7 +44,7 @@ pub async fn fetch(day: usize, year: usize) -> Result<String, Error> {
         .text()
         .await
         .expect("err: Extracting .text() failed")
-        .trim()
+        .trim_end()
         .to_string();
 
     println!("Downloaded day_{:02}.in from server", day);

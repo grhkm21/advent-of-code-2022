@@ -1,4 +1,4 @@
-use std::cell::UnsafeCell;
+use std::cell::RefCell;
 use std::default::Default;
 use std::fmt::Debug;
 use std::ops::Add;
@@ -14,7 +14,7 @@ where
 {
     val: Option<T>,
     name: &'a str,
-    edges: UnsafeCell<Vec<&'a Node<'a, T>>>,
+    edges: RefCell<Vec<&'a Node<'a, T>>>,
 }
 
 impl<'a, T> Node<'a, T>
@@ -25,25 +25,21 @@ where
         arena.alloc(Node {
             val,
             name,
-            edges: UnsafeCell::new(Vec::new()),
+            edges: RefCell::new(Vec::new()),
         })
     }
 
     fn push(&'a self, node: &'a Node<'a, T>) {
-        unsafe {
-            (*self.edges.get()).push(node);
-        }
+        (*self.edges.borrow_mut()).push(node);
     }
 
     fn find_name<'b>(&'a self, name: &'b str) -> Option<&'a Node<'a, T>> {
-        unsafe {
-            for node in &(*self.edges.get()) {
-                if node.name == name {
-                    return Some(node);
-                }
+        for node in &(*self.edges.borrow()) {
+            if node.name == name {
+                return Some(node);
             }
-            None
         }
+        None
     }
 
     fn sum(&self) -> T {
@@ -51,10 +47,8 @@ where
         if let Some(val) = self.val {
             res = res + val;
         }
-        unsafe {
-            for node in &(*self.edges.get()) {
-                res = res + node.sum();
-            }
+        for node in &(*self.edges.borrow()) {
+            res = res + node.sum();
         }
         res
     }
@@ -65,10 +59,8 @@ where
     {
         let mut res = Vec::new();
         res.push(f(self));
-        unsafe {
-            for n in &(*self.edges.get()) {
-                res.extend(n.traverse(f));
-            }
+        for n in &(*self.edges.borrow()) {
+            res.extend(n.traverse(f));
         }
         res
     }
