@@ -9,7 +9,7 @@ struct Interval {
 }
 
 fn make_interval(s: &str) -> Interval {
-    let parts = s.split_once("-").expect(SPLIT_ERR);
+    let parts = s.split_once('-').expect(SPLIT_ERR);
     Interval {
         l: parts.0.parse().expect(INT_ERR),
         r: parts.1.parse().expect(INT_ERR),
@@ -38,7 +38,7 @@ pub fn solve(contents: &str) -> (usize, usize) {
 
     for line in contents
         .lines()
-        .map(|s| s.split_once(",").expect(SPLIT_ERR))
+        .map(|s| s.split_once(',').expect(SPLIT_ERR))
     {
         let mut interval1 = make_interval(line.0);
         let mut interval2 = make_interval(line.1);

@@ -5,18 +5,18 @@ use itertools::Itertools;
 const SPLIT_ERR: &str = "err: can't split string";
 const TUPLE_ERR: &str = "err: can't unpack tuple";
 
-// FIFO: stack, FILO: queue
+// Fifo: stack, Filo: queue
 #[derive(PartialEq)]
 enum OperationOrder {
-    FIFO,
-    FILO,
+    Fifo,
+    Filo,
 }
 
 impl fmt::Display for OperationOrder {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match *self {
-            OperationOrder::FIFO => write!(f, "Part 1 (FIFO): "),
-            OperationOrder::FILO => write!(f, "Part 2 (FILO): "),
+            OperationOrder::Fifo => write!(f, "Part 1 (Fifo): "),
+            OperationOrder::Filo => write!(f, "Part 2 (Filo): "),
         }
     }
 }
@@ -39,7 +39,7 @@ fn _solve(contents: &str, option: OperationOrder) -> String {
     diagram_lines.reverse();
 
     // parse diagram into Vec<Vec<char>>
-    let cols = 9;
+    let cols = diagram_lines.len() - 1;
     let mut rows = vec![Vec::<char>::new(); cols];
 
     for row in &diagram_lines[1..] {
@@ -67,7 +67,7 @@ fn _solve(contents: &str, option: OperationOrder) -> String {
         let src = &mut rows[src_idx - 1];
         let mut tmp = src[src.len() - num..].to_vec();
 
-        if option == OperationOrder::FIFO {
+        if option == OperationOrder::Fifo {
             tmp.reverse();
         }
 
@@ -79,7 +79,7 @@ fn _solve(contents: &str, option: OperationOrder) -> String {
 }
 
 pub fn solve(contents: &str) -> (String, String) {
-    let part1 = _solve(contents, OperationOrder::FIFO);
-    let part2 = _solve(contents, OperationOrder::FILO);
+    let part1 = _solve(contents, OperationOrder::Fifo);
+    let part2 = _solve(contents, OperationOrder::Filo);
     (part1, part2)
 }

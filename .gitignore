@@ -1,7 +1,7 @@
-target
-Cargo.lock
+/target
+/Cargo.lock
+/input
+/session
+/cookies
 
-.vscode
-
-cookies
-session
+/.vscode

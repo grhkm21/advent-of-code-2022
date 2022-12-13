@@ -9,7 +9,7 @@ struct Pos {
 
 impl Pos {
     fn new(x: i32, y: i32) -> Pos {
-        Pos { x: x, y: y }
+        Pos { x, y }
     }
 }
 
@@ -38,13 +38,13 @@ fn sgn(x: i32) -> i32 {
 }
 
 fn get_dir(dir: &str) -> Pos {
-    return match dir {
+    match dir {
         "R" => Pos::new(1, 0),
         "L" => Pos::new(-1, 0),
         "U" => Pos::new(0, 1),
         "D" => Pos::new(0, -1),
         _ => unreachable!(),
-    };
+    }
 }
 
 fn pull(head: Pos, tail: Pos) -> Pos {
@@ -66,8 +66,8 @@ fn simulate(chains: usize, contents: &str) -> usize {
     let mut chain_pos: Vec<Pos> = vec![Pos::new(0, 0); chains];
 
     vis.insert(chain_pos[chains - 1]);
-    for line in contents.split("\n") {
-        if let Some((dir, len)) = line.split_once(" ") {
+    for line in contents.split('\n') {
+        if let Some((dir, len)) = line.split_once(' ') {
             let len = len
                 .parse::<isize>()
                 .expect("err: Failed to parse int {len}");

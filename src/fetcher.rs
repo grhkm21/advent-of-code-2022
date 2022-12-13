@@ -25,14 +25,13 @@ pub async fn fetch(day: usize, year: usize) -> Result<String, Error> {
     let url = &format!("https://adventofcode.com/{year}/day/{day}/input");
     let client = get_client(url);
 
-    let fetch_err = format!("err: Fetching {} failed", url);
+    let fetch_err = format!("err: Fetching {url} failed");
     let response = client.get(url).send().await.expect(&fetch_err);
 
     let status = response.status();
     if !status.is_success() {
         let status_err = format!(
-            "err: Fetching {} failed with status code: {}\nresponse: {:#?}",
-            url, status, response
+            "err: Fetching {url} failed with status code: {status}\nresponse: {response:#?}",
         );
         panic!("{}", &status_err);
     }
@@ -47,7 +46,7 @@ pub async fn fetch(day: usize, year: usize) -> Result<String, Error> {
         .trim_end()
         .to_string();
 
-    println!("Downloaded day_{:02}.in from server", day);
+    println!("Downloaded day_{day:02}.in from server");
     Ok(body)
 }
 
@@ -65,7 +64,7 @@ pub async fn submit(day: usize, answer: String, level: usize, year: usize) {
     let mut input = "".to_string();
     let _ = stdin().read_line(&mut input);
 
-    if !input.to_uppercase().starts_with("Y") {
+    if !input.to_uppercase().starts_with('Y') {
         println!("Stopping");
         return;
     }
@@ -78,13 +77,12 @@ pub async fn submit(day: usize, answer: String, level: usize, year: usize) {
     let params = [("answer", answer), ("level", level.to_string())];
     let response = client.post(url).form(&params).send().await;
 
-    let response_body;
-    if !response.is_ok() {
-        println!("err: Submitting to {} with params {:?} failed", url, params);
+    let response_body = if response.is_err() {
+        println!("err: Submitting to {url} with params {params:?} failed");
         process::exit(1);
     } else {
-        response_body = response.unwrap();
-    }
+        response.unwrap()
+    };
 
     // println!("{:?}", response_body);
     println!("status: {}", response_body.status());
@@ -104,6 +102,6 @@ pub async fn submit(day: usize, answer: String, level: usize, year: usize) {
 
     // TODO: parse response and format
 
-    println!("Submitted answer for Day #{:02}, level {}!", day, level);
+    println!("Submitted answer for Day #{day:02}, level {level}!");
     println!("Response body:\n{body}");
 }

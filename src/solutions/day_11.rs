@@ -39,7 +39,7 @@ impl Monkey {
 
     fn operation(&self, val: &BigUint) -> BigUint {
         let operation_val = if let OperationVal::Val(operation_val) = &self.operation_val {
-            &operation_val
+            operation_val
         } else {
             val
         };
@@ -90,7 +90,7 @@ pub fn solve(contents: &str) -> (usize, usize) {
 
     for monkey_str in contents.split("\n\n") {
         let (items_str, operation_str, test_div, test_true, test_false) = if let [_, items_str, operation_str, test_div_str, test_true_str, test_false_str] =
-            monkey_str.split("\n").into_iter().collect::<Vec<&str>>()[..]
+            monkey_str.split('\n').into_iter().collect::<Vec<&str>>()[..]
         {
             let test_div = find_int(test_div_str);
             let test_true = find_int(test_true_str);

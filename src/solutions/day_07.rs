@@ -34,12 +34,10 @@ where
     }
 
     fn find_name<'b>(&'a self, name: &'b str) -> Option<&'a Node<'a, T>> {
-        for node in &(*self.edges.borrow()) {
-            if node.name == name {
-                return Some(node);
-            }
-        }
-        None
+        (*self.edges.borrow())
+            .iter()
+            .find(|&node| node.name == name)
+            .copied()
     }
 
     fn sum(&self) -> T {
@@ -79,26 +77,19 @@ fn init<'a>(arena: &'a Arena<Node<'a, usize>>, contents: &'a str) -> &'a Node<'a
         }
 
         let cmd = cmd_group[0]
-            .split_once(" ")
+            .split_once(' ')
             .unwrap_or_else(|| (cmd_group[0], ""));
         match cmd {
             ("ls", "") => {
                 for output in &cmd_group[1..] {
-                    let (data, dir) = output
-                        .split_once(" ")
-                        .expect(&format!("err: can't split {:?}", output));
+                    let (data, dir) = output.split_once(' ').unwrap();
 
                     // assume node is new
                     let cur = cur_path[cur_path.len() - 1];
 
                     let val = match data {
                         "dir" => None,
-                        data => {
-                            let val = data
-                                .parse()
-                                .expect(&format!("err: can't parse {data:?} to int"));
-                            Some(val)
-                        }
+                        data => Some(data.parse().unwrap()),
                     };
 
                     match cur.find_name(dir) {

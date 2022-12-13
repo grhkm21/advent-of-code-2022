@@ -1,2 +1,0 @@
--   Write `Pt` struct for day 9
--   Refine usage of `fetcher.rs`

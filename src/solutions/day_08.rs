@@ -5,11 +5,7 @@ pub fn parse_board(contents: &str) -> Vec<Vec<usize>> {
     for line in contents.lines() {
         res.push(
             line.chars()
-                .map(|c| {
-                    c.to_string()
-                        .parse::<usize>()
-                        .expect(&format!("err: failed to parse {:?}", c))
-                })
+                .map(|c| c.to_string().parse::<usize>().unwrap())
                 .collect(),
         )
     }

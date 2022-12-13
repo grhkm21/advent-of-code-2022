@@ -5,7 +5,7 @@ pub fn solve(contents: &str) -> (usize, usize) {
     let mut vals = Vec::new();
     for player in contents.split("\n\n") {
         let mut cur_val = 0;
-        for line in player.split("\n") {
+        for line in player.split('\n') {
             let line_val = match line.parse::<usize>() {
                 Ok(n) => n,
                 Err(_e) => {

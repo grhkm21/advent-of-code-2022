@@ -1,6 +1,6 @@
 fn round(move1: usize, move2: usize) -> usize {
     // returns score based on whether move2 beats move1
-    return match [move1, move2] {
+    match [move1, move2] {
         [1, 1] => 3,
         [1, 2] => 6,
         [1, 3] => 0,
@@ -11,13 +11,13 @@ fn round(move1: usize, move2: usize) -> usize {
         [3, 2] => 0,
         [3, 3] => 3,
         _ => unreachable!(),
-    };
+    }
 }
 
 fn parse_tuples(from: &str) -> Vec<(&str, &str)> {
     from.trim()
         .lines()
-        .map(|x| x.split_once(" ").unwrap())
+        .map(|x| x.split_once(' ').unwrap())
         .collect()
 }
 

@@ -1,15 +1,4 @@
-pub mod day_00;
-pub mod day_01;
-pub mod day_02;
-pub mod day_03;
-pub mod day_04;
-pub mod day_05;
-pub mod day_06;
-pub mod day_07;
-pub mod day_08;
-pub mod day_09;
-pub mod day_10;
-pub mod day_11;
+use crate::solutions::*;
 
 #[allow(dead_code)]
 pub enum SolverType {
@@ -18,7 +7,7 @@ pub enum SolverType {
     String,
 }
 
-pub const DAYS: usize = 11;
+pub const DAYS: usize = 13;
 pub const SOLS: [(*const (), SolverType); DAYS + 1] = [
     (day_00::solve as *const (), SolverType::Integer),
     (day_01::solve as *const (), SolverType::Integer),
@@ -32,6 +21,8 @@ pub const SOLS: [(*const (), SolverType); DAYS + 1] = [
     (day_09::solve as *const (), SolverType::Integer),
     (day_10::solve as *const (), SolverType::String),
     (day_11::solve as *const (), SolverType::Integer),
+    (day_12::solve as *const (), SolverType::Integer),
+    (day_13::solve as *const (), SolverType::Integer),
 ];
 
 pub fn solve(contents: &str, day: usize) -> (String, String) {

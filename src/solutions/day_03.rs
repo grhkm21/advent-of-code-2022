@@ -21,13 +21,13 @@ pub fn solve(contents: &str) -> (usize, usize) {
     let mut part1 = 0;
     for line in contents.lines() {
         let n = line.len();
-        let chars1 = (&line[0..n / 2]).chars().collect();
-        let chars2 = (&line[n / 2..n]).chars().collect();
+        let chars1 = line[0..n / 2].chars().collect();
+        let chars2 = line[n / 2..n].chars().collect();
         part1 += priority(intersect(chars1, chars2)[0]);
     }
 
     let mut part2 = 0;
-    let lines = contents.split("\n").collect::<Vec<&str>>();
+    let lines = contents.split('\n').collect::<Vec<&str>>();
 
     for i in (0..lines.len()).step_by(3) {
         let chars1 = lines[i].chars().collect();

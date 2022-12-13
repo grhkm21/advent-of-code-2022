@@ -1,16 +1,12 @@
 pub fn solve(contents: &str) -> (usize, usize) {
-    (contents.chars().nth(0).expect("") as usize, 1)
-}
+    let mut part1 = 0;
+    let mut part2 = 0;
 
-#[cfg(test)]
-mod tests {
-    const INPUT: &str = "input";
-
-    #[test]
-    fn test_day0() {
-        let (part1, part2) = super::solve(INPUT);
-
-        assert_eq!(part1, 0);
-        assert_eq!(part2, 1);
+    for line in contents.lines() {
+        let x = line.parse::<usize>().unwrap();
+        part1 += x;
+        part2 += x * 10;
     }
+
+    (part1, part2)
 }
