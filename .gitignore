@@ -1,7 +1,8 @@
-/target
-/Cargo.lock
-/input
-/session
-/cookies
+target
+Cargo.lock
+input
+session
+cookies
 
-/.vscode
+.vscode
+*.py
