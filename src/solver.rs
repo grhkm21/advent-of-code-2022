@@ -7,7 +7,7 @@ pub enum SolverType {
     String,
 }
 
-pub const DAYS: usize = 14;
+pub const DAYS: usize = 15;
 pub const SOLS: [(*const (), SolverType); DAYS + 1] = [
     (day_00::solve as *const (), SolverType::Integer),
     (day_01::solve as *const (), SolverType::Integer),
@@ -24,6 +24,7 @@ pub const SOLS: [(*const (), SolverType); DAYS + 1] = [
     (day_12::solve as *const (), SolverType::Integer),
     (day_13::solve as *const (), SolverType::Integer),
     (day_14::solve as *const (), SolverType::Integer),
+    (day_15::solve as *const (), SolverType::Integer),
 ];
 
 pub fn solve(contents: &str, day: usize) -> (String, String) {

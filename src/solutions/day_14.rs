@@ -52,10 +52,14 @@ pub fn solve(contents: &str) -> (usize, usize) {
             let (x1, y1) = points[i].split_once(',').unwrap();
             let (x2, y2) = points[i + 1].split_once(',').unwrap();
 
-            let mut x1 = x1.parse::<usize>().unwrap();
-            let mut y1 = y1.parse::<usize>().unwrap();
-            let mut x2 = x2.parse::<usize>().unwrap();
-            let mut y2 = y2.parse::<usize>().unwrap();
+            let (mut x1, mut y1, mut x2, mut y2) = match [x1, y1, x2, y2]
+                .iter()
+                .flat_map(|s| s.parse::<usize>())
+                .collect::<Vec<usize>>()[..]
+            {
+                [x1, y1, x2, y2] => (x1, y1, x2, y2),
+                _ => unreachable!(),
+            };
 
             if y1 > max_y {
                 max_y = y1;
