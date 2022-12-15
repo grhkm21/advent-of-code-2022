@@ -98,7 +98,6 @@ pub fn solve(contents: &str) -> (usize, usize) {
         }
 
         if impossible.len() > 1 {
-            println!("{impossible:?} {i}");
             assert_eq!(impossible[0].1 + 1, impossible[1].0 - 1);
             let v = impossible[0].1 + 1;
             return (part1, (u * N + v).try_into().unwrap());
