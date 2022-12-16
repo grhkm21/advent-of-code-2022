@@ -1,3 +1,3 @@
-fn solve(contents: &str) -> (usize, usize) {
+pub fn solve(contents: &str) -> (usize, usize) {
     (0, 0)
 }
