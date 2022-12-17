@@ -105,8 +105,6 @@ pub fn solve(contents: &str) -> (usize, usize) {
     let mut dist = Vec::new();
     calc_dist(&graph, &mut dist);
 
-    let n = graph.len();
-
     let src = name_to_idx("AA".to_string());
     let part1 = dfs(src, 0, 30, false, &dist, &vals, &positive);
     let part2 = dfs(src, 0, 26, true, &dist, &vals, &positive);
