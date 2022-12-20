@@ -88,7 +88,7 @@ pub fn solve(contents: &str) -> (usize, usize) {
             part1 = max_y + 1;
         }
 
-        // Extract top 100 rows
+        // Extract top 70 rows
         if max_y >= 69 {
             let mut top_70_rows = Vec::new();
             for y in max_y - 69..=max_y {

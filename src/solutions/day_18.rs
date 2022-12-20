@@ -6,7 +6,7 @@ use std::str::FromStr;
 struct Point {
     x: i64,
     y: i64,
-    z: i64
+    z: i64,
 }
 
 impl Add<Point> for Point {
@@ -15,7 +15,7 @@ impl Add<Point> for Point {
         Point {
             x: self.x + other.x,
             y: self.y + other.y,
-            z: self.z + other.z
+            z: self.z + other.z,
         }
     }
 }
@@ -60,13 +60,27 @@ fn dfs(pt: Point, points: &HashSet<Point>, vis: &mut HashSet<Point>) {
 }
 
 pub fn solve(contents: &str) -> (usize, usize) {
-    let points = contents.lines().map(|c| c.parse::<Point>().unwrap()).collect::<HashSet<Point>>();
+    let points = contents
+        .lines()
+        .map(|c| c.parse::<Point>().unwrap())
+        .collect::<HashSet<Point>>();
     let mut exterior = HashSet::new();
 
     let mut cnt1 = 0;
     let mut cnt2 = 0;
 
-    dfs(Point { x: -1, y: -1, z: -1 }, &points, &mut exterior);
+    // Fix potential recursion stack overflow
+    stacker::grow(64 * 1024 * 1024, || {
+        dfs(
+            Point {
+                x: -1,
+                y: -1,
+                z: -1,
+            },
+            &points,
+            &mut exterior,
+        );
+    });
 
     for &pt in &points {
         for dir in DIRS {

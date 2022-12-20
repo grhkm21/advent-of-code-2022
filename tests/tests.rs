@@ -21,4 +21,6 @@ solutions_tests! {
     test_day_14: (14, ("24", "93")),
     test_day_15: (15, ("0", "56000011")), // 0 is because target y level is different
     test_day_16: (16, ("1651", "1707")),
+    test_day_17: (17, ("3068", "1514285714288")),
+    test_day_18: (18, ("64", "58")),
 }

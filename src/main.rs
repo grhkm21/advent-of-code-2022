@@ -42,6 +42,7 @@ fn run_day_solution(day: usize, data_src: &str) {
     println!("Running solution with {data_src} for Day #{day:02}!");
 
     let contents = fs::read_to_string(input_file_path).unwrap();
+    let contents = contents.trim();
     let (part1, part2) = solver::solve(&contents, day);
     println!("Part 1: {part1}, Part 2: {part2}");
 
