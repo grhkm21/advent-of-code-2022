@@ -1,6 +1,6 @@
 use lazy_static::lazy_static;
 use regex::Regex;
-use std::cmp::{Ordering, PartialEq, PartialOrd};
+use std::cmp::{max, Ordering, PartialEq, PartialOrd};
 
 #[derive(Copy, Clone, Debug, Default, PartialEq)] 
 struct Resource {
@@ -113,7 +113,8 @@ fn dfs(
 
 pub fn solve(contents: &str) -> (usize, usize) {
     let blueprints: Vec<Blueprint> = contents.lines().map(|l| Blueprint::new(l)).collect();
-    println!("r1 > r2? {}", r1 > r2);
+    
+    // println!("r1 > r2? {}", r1 > r2);
 
     (0, 0)
 }
