@@ -1,17 +1,5 @@
-[package]
-name = "advent_of_code_2022"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-itertools = "0.10.5"
-reqwest = { version = "0.11", features = ["cookies"] }
-tokio = { version = "1", features = ["full"] }
-futures = "0.3"
-typed-arena = "2.0.1"
-rand = "0.8.5"
-regex = "1.7.0"
-num-bigint = "0.4.3"
-num-traits = "0.2.15"
-lazy_static = "1.4.0"
-stacker = "0.1.15"
+[workspace]
+members = [
+	"grhkm-poly",
+	"grhkm-advent-of-code-2022"
+]

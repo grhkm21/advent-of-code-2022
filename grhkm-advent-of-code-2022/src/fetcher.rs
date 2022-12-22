@@ -4,10 +4,10 @@ use std::fs;
 use std::io::{stdin, stdout, Write};
 use std::process;
 
-fn get_client(url: &str) -> Client {
+fn get_client(url: &str, cookie_file_path: &String) -> Client {
     let url: Url = url.parse().unwrap();
 
-    let cookie = fs::read_to_string("./cookies").expect("err: can't read file");
+    let cookie = fs::read_to_string(cookie_file_path).unwrap_or_else(|_| format!("err: can't read cookie file {cookie_file_path}"));
 
     let jar = Jar::default();
     jar.add_cookie_str(&cookie, &url);
@@ -19,11 +19,11 @@ fn get_client(url: &str) -> Client {
 }
 
 #[tokio::main]
-pub async fn fetch(day: usize, year: usize) -> Result<String, Error> {
+pub async fn fetch(day: usize, year: usize, cookie_file_path: &String) -> Result<String, Error> {
     println!("Downloading from server...");
 
     let url = &format!("https://adventofcode.com/{year}/day/{day}/input");
-    let client = get_client(url);
+    let client = get_client(url, cookie_file_path);
 
     let fetch_err = format!("err: Fetching {url} failed");
     let response = client.get(url).send().await.expect(&fetch_err);
@@ -51,7 +51,7 @@ pub async fn fetch(day: usize, year: usize) -> Result<String, Error> {
 }
 
 #[tokio::main]
-pub async fn submit(day: usize, answer: String, level: usize, year: usize) {
+pub async fn submit(day: usize, answer: String, level: usize, year: usize, cookie_file_path: &String) {
     if level != 1 && level != 2 {
         println!("err: level = {level} is not 1 or 2!");
         process::exit(1);
@@ -72,7 +72,7 @@ pub async fn submit(day: usize, answer: String, level: usize, year: usize) {
     println!("Submitting to server...");
 
     let url = &format!("https://adventofcode.com/{year}/day/{day}/answer");
-    let client = get_client(url);
+    let client = get_client(url, cookie_file_path);
 
     let params = [("answer", answer), ("level", level.to_string())];
     let response = client.post(url).form(&params).send().await;
