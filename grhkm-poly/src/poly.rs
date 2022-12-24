@@ -143,6 +143,7 @@ impl<T> MulAssign for Poly<T> where T: Numeric {
 mod tests {
     use super::Poly;
     use lazy_static::lazy_static;
+    use pretty_assertions::{assert_eq, assert_ne};
 
     macro_rules! assert_eq_vec {
         ($left:expr, $right:expr) => {

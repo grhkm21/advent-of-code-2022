@@ -16,3 +16,7 @@ num-traits = "0.2.15"
 lazy_static = "1.4.0"
 stacker = "0.1.15"
 clap = { version = "4.0.32", features = ["cargo"] }
+
+[dev-dependencies]
+pretty_assertions = "1.0.0"
+
