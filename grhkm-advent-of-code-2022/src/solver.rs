@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 use crate::solutions::*;
 
 #[allow(dead_code)]
@@ -7,7 +9,7 @@ pub enum SolverType {
     String,
 }
 
-pub const DAYS: usize = 23;
+pub const DAYS: usize = 24;
 pub const SOLS: [(*const (), SolverType); DAYS + 1] = [
     (day_00::solve as *const (), SolverType::Integer),
     (day_01::solve as *const (), SolverType::Integer),
@@ -33,11 +35,13 @@ pub const SOLS: [(*const (), SolverType); DAYS + 1] = [
     (day_21::solve as *const (), SolverType::Integer),
     (day_22::solve as *const (), SolverType::Integer),
     (day_23::solve as *const (), SolverType::Integer),
+    (day_24::solve as *const (), SolverType::Integer),
 ];
 
 pub fn solve(contents: &str, day: usize) -> (String, String) {
     let (solver, solver_type) = &SOLS[day];
-
+    
+    let now = Instant::now();
     let (part1, part2): (String, String) = unsafe {
         match solver_type {
             SolverType::BigInteger => {
@@ -59,6 +63,6 @@ pub fn solve(contents: &str, day: usize) -> (String, String) {
             }
         }
     };
-
+    println!("Day {day:02} time taken: {}ms", now.elapsed().as_millis());
     (part1, part2)
 }
