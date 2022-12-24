@@ -8,11 +8,7 @@ use clap::{arg, command, ArgAction};
 use std::fs;
 use std::path::Path;
 use std::process;
-
-pub mod consts;
-pub mod fetcher;
-pub mod solutions;
-pub mod solver;
+use advent_of_code_2022::*;
 
 struct Data {
     cookie_file_path: String,

@@ -1,71 +1,6 @@
+use crate::utils::*;
 use std::cmp::{max, min};
 use std::collections::{HashMap, HashSet};
-use std::ops::{Add, Sub};
-
-// TODO: Extract this into utils.rs
-#[derive(Copy, Clone, Debug, Hash, PartialEq, Eq)]
-struct Point {
-    x: i64,
-    y: i64,
-}
-
-impl Point {
-    const fn new(x: i64, y: i64) -> Point {
-        Point { x, y }
-    }
-
-    fn left(&self) -> Point {
-        Point {
-            x: self.y,
-            y: -self.x,
-        }
-    }
-
-    fn right(&self) -> Point {
-        Point {
-            x: -self.y,
-            y: self.x,
-        }
-    }
-}
-
-impl Add<Point> for Point {
-    type Output = Point;
-    fn add(self, other: Self) -> Self::Output {
-        Point {
-            x: self.x + other.x,
-            y: self.y + other.y,
-        }
-    }
-}
-
-impl Sub<Point> for Point {
-    type Output = Point;
-    fn sub(self, other: Self) -> Self::Output {
-        Point {
-            x: self.x - other.x,
-            y: self.y - other.y,
-        }
-    }
-}
-
-const DIRS4: [Point; 4] = [
-    Point::new(-1, 0),
-    Point::new(1, 0),
-    Point::new(0, -1),
-    Point::new(0, 1),
-];
-
-const DIRS8: [Point; 8] = [
-    Point::new(-1, 0),
-    Point::new(-1, -1),
-    Point::new(-1, 1),
-    Point::new(0, -1),
-    Point::new(0, 1),
-    Point::new(1, 0),
-    Point::new(1, -1),
-    Point::new(1, 1),
-];
 
 fn round(elves: &mut HashSet<Point>, round: usize) -> bool {
     let mut preferred: HashMap<Point, Point> = HashMap::new();
@@ -74,9 +9,8 @@ fn round(elves: &mut HashSet<Point>, round: usize) -> bool {
     for &elf in elves.iter() {
         // count neighbors
         let mut prefer = elf;
-        if DIRS8
-            .iter()
-            .filter(|&&dir| elves.contains(&(elf + dir)))
+        if elf.dirs8().iter()
+            .filter(|&elf| elves.contains(elf))
             .count()
             > 0
         {

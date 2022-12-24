@@ -8,3 +8,4 @@ pub mod consts;
 pub mod fetcher;
 pub mod solutions;
 pub mod solver;
+pub mod utils;
