@@ -33,6 +33,10 @@ impl Point {
     pub fn dirs8(&self) -> Vec<Point> {
         DIRS8.iter().map(|d| *self + *d).collect()
     }
+
+    pub fn is_valid(&self, x_bounds: i64, y_bounds: i64) -> bool {
+        (0..x_bounds).contains(&self.x) && (0..y_bounds).contains(&self.y)
+    }
 }
 
 impl Add<Point> for Point {
