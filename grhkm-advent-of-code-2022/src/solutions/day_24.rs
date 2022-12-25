@@ -1,5 +1,5 @@
-use std::collections::{HashMap, HashSet, VecDeque};
 use rayon::prelude::*;
+use std::collections::{HashMap, HashSet, VecDeque};
 
 use crate::utils::*;
 
@@ -56,9 +56,13 @@ pub fn solve(contents: &str) -> (usize, usize) {
 
     // Grid repeats every `cycles` iterations
     let cycles = lcm(row as i64, col as i64) as usize;
-    let grids = (0..=cycles).into_par_iter().map(|rd| round(&grid, rd as i64)).collect::<Vec<_>>();
+    let grids = (0..=cycles)
+        .into_par_iter()
+        .map(|rd| round(&grid, rd as i64))
+        .collect::<Vec<_>>();
 
-    let graph: HashMap<(usize, Point), Vec<(usize, Point)>> = (0..cycles).into_par_iter()
+    let graph: HashMap<(usize, Point), Vec<(usize, Point)>> = (0..cycles)
+        .into_par_iter()
         .map(|rd| {
             // Make edges from rd to rd + 1
             let cur_grid = &grids[rd];
