@@ -1,13 +1,54 @@
 use itertools::Itertools;
 use std::cmp::max;
+use std::fmt::Debug;
 use std::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign};
 
-pub trait Numeric =
-    Sized + Copy + Clone + Add<Output = Self> + Sub<Output = Self> + Mul<Output = Self> + Default;
+pub trait Numeric = Sized
+    + Copy
+    + Clone
+    + Add<Output = Self>
+    + Sub<Output = Self>
+    + Mul<Output = Self>
+    + Default
+    + Debug
+    + PartialEq
+    + Eq;
 
 #[derive(Clone)]
 pub struct Poly<T: Numeric> {
     coef: Vec<T>,
+}
+
+impl<T> Debug for Poly<T>
+where
+    T: Numeric + Into<i128>,
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        if self.coef.len() == 1 && self.coef[0].into() == 0 {
+            return write!(f, "0");
+        }
+
+        let mut coef_iter = self.coef.iter().enumerate();
+        while let Some((i, c)) = coef_iter.next() {
+            let c: i128 = (*c).into();
+            if c == 0 {
+                continue;
+            }
+            if c < 0 {
+                write!(f, " - ")?;
+            } else if i > 0 {
+                write!(f, " + ")?;
+            }
+            write!(f, "{}", c.abs())?;
+            if i > 0 {
+                write!(f, "x")?;
+                if i > 1 {
+                    write!(f, "^{}", i)?;
+                }
+            }
+        }
+        Ok(())
+    }
 }
 
 impl<T> Poly<T>
@@ -112,14 +153,13 @@ where
         }
 
         let coef_first = self.get(0 as usize).into();
-        println!("{coef_first:?}, ft: {:?}", Factor::positive_divisors(coef_first).iter().map(|r| vec![-(*r),*r]).flatten().collect::<Vec<_>>());
 
-        let mut res: Vec<i128> = Factor::positive_divisors(coef_first)
-            .iter()
-            .map(|r| vec![-(*r), *r])
-            .flatten()
+        let factors = Factor::positive_divisors(coef_first);
+        let neg_factors = factors.clone();
+        let neg_factors = neg_factors.iter().rev().map(|c| -c);
+        let mut res = (neg_factors.chain(factors.into_iter()))
             .filter(|r| self.eval_as(*r) == 0)
-            .collect();
+            .collect::<Vec<i128>>();
         if coef_first == 0 {
             res.push(0);
         }
@@ -232,22 +272,44 @@ where
 
 // Factor numbers
 
+#[derive(Copy, Clone)]
+struct PowerIter {
+    base: i128,
+    buf: i128,
+    cur_exp: u128,
+    final_exp: u128,
+}
+
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 struct FactorItem(i128, u128);
+
 struct Factor;
 
-impl Iterator for FactorItem {
+impl Iterator for PowerIter {
     type Item = i128;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.1 == u128::MAX {
+        if self.cur_exp > self.final_exp {
             None
-        } else if self.1 == 0 {
-            self.1 = u128::MAX;
-            Some(1)
         } else {
-            self.1 -= 1;
-            Some(self.0.pow((self.1 + 1) as u32))
+            let res = Some(self.buf);
+            self.buf *= self.base;
+            self.cur_exp += 1;
+            res
+        }
+    }
+}
+
+impl IntoIterator for FactorItem {
+    type Item = i128;
+    type IntoIter = PowerIter;
+
+    fn into_iter(self) -> Self::IntoIter {
+        PowerIter {
+            base: self.0,
+            buf: 1,
+            cur_exp: 0,
+            final_exp: self.1,
         }
     }
 }
@@ -299,11 +361,12 @@ impl Factor {
         if iter.is_empty() {
             iter.push(FactorItem(1, 1));
         }
-        let mut res = iter.into_iter()
+        let mut res = iter
+            .into_iter()
             .multi_cartesian_product()
             .map(|v| v.iter().copied().reduce(|a, b| a * b).unwrap())
             .collect::<Vec<i128>>();
-        
+
         // TODO: Make this optional (and fix tests)
         res.sort();
 
@@ -384,7 +447,7 @@ mod tests {
         assert_eq!(mul_poly2_poly1.coef, vec![6, 12, 22, 11, 18, 9]);
     }
 
-    // Polynomail root finding
+    // Polynomial root finding
     #[test]
     fn test_roots_integer() {
         // (x + 1)(x + 2), (2x + 1)(x + 2)
@@ -398,28 +461,40 @@ mod tests {
 
     // Factoring
 
-    fn into_factoritem_vec(v: Vec<(i128, u128)>) -> Vec<FactorItem> {
+    fn into_factoritem_vec<const N: usize>(v: [(i128, u128); N]) -> Vec<FactorItem> {
         v.iter()
             .map(|(p, e)| FactorItem(*p, *e))
             .collect::<Vec<_>>()
     }
 
-    #[test_case(12, vec![(2, 2), (3, 1)] ; "small positive case")]
-    #[test_case(-15, vec![(-1, 1), (3, 1), (5, 1)] ; "negative case")]
-    #[test_case(162179607919826590230182726147616596160, vec![(2, 6), (3, 8), (5, 1), (7, 5), (23, 13), (97, 4), (103, 1)]; "large case")]
-    #[test_case(835991099723193079, vec![(835991099723193079, 1)] ; "60-bit prime case")]
-    fn test_factorisation(num: i128, expected: Vec<(i128, u128)>) {
+    #[test_case(12, [(2, 2), (3, 1)] ; "positive")]
+    #[test_case(-15, [(-1, 1), (3, 1), (5, 1)] ; "negative")]
+    #[test_case(162179607919826590230182726147616596160, [(2, 6), (3, 8), (5, 1), (7, 5), (23, 13), (97, 4), (103, 1)]; "large")]
+    #[test_case(835991099723193079, [(835991099723193079, 1)] ; "60-bit prime")]
+    fn test_factorisation<const N: usize>(num: i128, expected: [(i128, u128); N]) {
         assert_eq_vec!(
             Factor::prime_factorisation(num),
             into_factoritem_vec(expected)
         );
     }
 
+    #[test_case(20, 6, Some(vec![1, 2, 4, 5, 10, 20]) ; "positive")]
+    #[test_case(-18, 6, Some(vec![1, 2, 3, 6, 9, 18]) ; "negative")]
+    #[test_case(620212131694574261856000000000000, 131040, None ; "lots of divisors")]
+    #[test_case(835991099723193079, 2, Some(vec![1, 835991099723193079]) ; "60-bit prime")]
+    fn test_positive_divisors(num: i128, divisors_len: usize, divisors: Option<Vec<i128>>) {
+        let num_divisors = Factor::positive_divisors(num);
+        assert_eq!(num_divisors.len(), divisors_len);
+        if let Some(divisors) = divisors {
+            assert_eq_vec!(num_divisors, divisors);
+        }
+    }
+
     #[test]
-    fn test_positive_divisors() {
-        // TODO: Finish this
-        println!("{:?}", Factor::positive_divisors(12));
-        assert_eq_vec!(Factor::positive_divisors(12), vec![1, 2, 3, 4, 6, 12]);
-        todo!();
+    // TODO: Test negative coefficients, floats
+    fn test_debug() {
+        assert_eq!(format!("{:?}", *POLY1), "1 + 2x + 3x^2");
+        assert_eq!(format!("{:?}", *POLY2), "6 + 4x^2 + 3x^3");
+        assert_eq!(format!("{:?}", *ZERO), "0");
     }
 }
