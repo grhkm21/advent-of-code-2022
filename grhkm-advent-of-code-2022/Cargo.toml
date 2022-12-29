@@ -19,6 +19,8 @@ clap = { version = "4.0.32", features = ["cargo"] }
 rayon = "1.6.1"
 openssl = { version = "0.10.35", features = ["vendored"] }
 
+poly = { version = "0.1.0", path = "../grhkm-poly" }
+
 [dev-dependencies]
 pretty_assertions = "1.0.0"
 

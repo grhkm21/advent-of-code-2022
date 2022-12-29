@@ -39,18 +39,22 @@ fn _solve(contents: &str, option: OperationOrder) -> String {
     diagram_lines.reverse();
 
     // parse diagram into Vec<Vec<char>>
-    let cols = diagram_lines.len() - 1;
-    let mut rows = vec![Vec::<char>::new(); cols];
+    let cols = diagram_lines[0].trim().split_whitespace().count();
+    let mut rows = vec![Vec::new(); cols];
 
     for row in &diagram_lines[1..] {
         let row = row.chars().collect::<Vec<_>>();
+        println!("{row:?}");
         for i in 0..cols {
             let c = row[i * 4 + 1];
             if c != ' ' {
                 rows[i].push(c);
+                print!("{i} -> {c}");
             }
         }
+        println!();
     }
+    println!("rows: {rows:?}");
 
     // parse moves
     let pw = |x: &str| x.parse::<usize>().unwrap();

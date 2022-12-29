@@ -7,6 +7,7 @@ use typed_arena::Arena;
 // Blanket implementation
 trait NodeValTrait<T> = Add<Output = T> + Default + Copy + Debug;
 
+// TODO: Extract this into separate module
 #[derive(Debug)]
 struct Node<'a, T>
 where

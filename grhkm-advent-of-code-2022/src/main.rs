@@ -16,6 +16,8 @@ struct Data {
     submit2: bool
 }
 
+// TODO: Wrap this into a struct
+// TODO: Use some error handling module instead of `panic` everywhere
 fn run_day_solution(day: usize, input_file_str: Option<&String>, data: &Data) {
     if day > solver::DAYS {
         process::exit(1)
@@ -44,7 +46,7 @@ fn run_day_solution(day: usize, input_file_str: Option<&String>, data: &Data) {
     println!("Running solution with {input_file_path:?} for Day #{day:02}!");
 
     let contents = fs::read_to_string(input_file_path).unwrap();
-    let contents = contents.trim();
+    let contents = contents.trim_end();
     let (part1, part2) = solver::solve(contents, day);
     println!("Part 1: {part1}, Part 2: {part2}");
 
@@ -58,6 +60,8 @@ fn run_day_solution(day: usize, input_file_str: Option<&String>, data: &Data) {
 }
 
 fn main() {
+    // TODO: Rewrite submit arguments as comma separated (-s 1,2)
+    // TODO: Make cookie optional, only required when downloading input
     let matches = command!()
         .arg(arg!(-d --day <DAY> "The day to run the solutions for").required(true))
         .arg(arg!(-c --cookie <COOKIE_FILE> "The cookie file to use").required(true))
