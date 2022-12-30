@@ -9,7 +9,9 @@ fn round(elves: &mut HashSet<Point>, round: usize) -> bool {
     for &elf in elves.iter() {
         // count neighbors
         let mut prefer = elf;
-        if elf.dirs8().iter()
+        if elf
+            .dirs8()
+            .iter()
             .filter(|&elf| elves.contains(elf))
             .count()
             > 0

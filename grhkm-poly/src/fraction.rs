@@ -1,7 +1,7 @@
+use super::poly::{Neg, One, Zero};
 use std::fmt::Display;
 use std::mem::swap;
-use std::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign};
-use super::poly::{Zero, One, Neg};
+use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
 #[derive(Copy, Clone, Debug, Eq, Ord)]
 pub struct Fraction {
@@ -13,9 +13,7 @@ impl Fraction {
     // Users MUST use the new constructor instead of the {} constructor
     // Otherwise, unexpected behaviours may occur
     pub fn new(num: i128, denom: i128) -> Fraction {
-        let mut frac = Fraction {
-            num, denom
-        };
+        let mut frac = Fraction { num, denom };
 
         // Handles denom == 0
         frac.reduce();
@@ -62,11 +60,17 @@ impl Fraction {
     }
 
     fn add(lhs: Fraction, rhs: Fraction) -> Fraction {
-        Fraction::new(lhs.num * rhs.denom + lhs.denom * rhs.num, lhs.denom * rhs.denom)
+        Fraction::new(
+            lhs.num * rhs.denom + lhs.denom * rhs.num,
+            lhs.denom * rhs.denom,
+        )
     }
 
     fn sub(lhs: Fraction, rhs: Fraction) -> Fraction {
-        Fraction::new(lhs.num * rhs.denom - lhs.denom * rhs.num, lhs.denom * rhs.denom)
+        Fraction::new(
+            lhs.num * rhs.denom - lhs.denom * rhs.num,
+            lhs.denom * rhs.denom,
+        )
     }
 
     fn mul(lhs: Fraction, rhs: Fraction) -> Fraction {

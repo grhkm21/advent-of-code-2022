@@ -1,6 +1,6 @@
-pub mod points;
-pub mod math;
 pub mod index;
+pub mod math;
+pub mod points;
 
-pub use points::*;
 pub use math::*;
+pub use points::*;

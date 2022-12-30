@@ -317,7 +317,6 @@ where
 
         for i in 0..=max(m, n) {
             if i <= m {
-
                 coef[i] = coef[i] + self.get(i);
             }
             if i <= n {

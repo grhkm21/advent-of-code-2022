@@ -1,8 +1,8 @@
+use poly::fraction::Fraction;
+use poly::poly::{Neg, One, Poly, Solvable, Zero};
 use std::collections::HashMap;
 use std::fmt::Display;
 use std::str::FromStr;
-use poly::fraction::Fraction;
-use poly::poly::{Poly, Zero, One, Neg, Solvable};
 
 #[derive(Clone, Debug)]
 enum Expr {
@@ -61,23 +61,37 @@ impl MonkeyTree {
         }
     }
 
-    fn insert<T>(&mut self, line: T) where T: Display + Into<String> {
+    fn insert<T>(&mut self, line: T)
+    where
+        T: Display + Into<String>,
+    {
         let line = line.to_string();
         let (name, expr) = line.split_once(": ").unwrap();
-        self.tree.entry(name.to_string()).or_insert(expr.parse().unwrap());
+        self.tree
+            .entry(name.to_string())
+            .or_insert(expr.parse().unwrap());
     }
 
-    fn set_root<T>(&mut self, root: T) where T: Display + Into<String> {
+    fn set_root<T>(&mut self, root: T)
+    where
+        T: Display + Into<String>,
+    {
         let root = root.to_string();
         self.root = Some(root);
     }
 
-    fn set_var<T>(&mut self, var: T) where T: Display + Into<String> {
+    fn set_var<T>(&mut self, var: T)
+    where
+        T: Display + Into<String>,
+    {
         let var = var.to_string();
         self.var = Some(var);
     }
 
-    fn eval_node<T>(&self, node: T) -> Poly<Fraction> where T: Display + Into<String> {
+    fn eval_node<T>(&self, node: T) -> Poly<Fraction>
+    where
+        T: Display + Into<String>,
+    {
         let node = node.to_string();
         if let Some(var) = &self.var {
             if &node == var {
@@ -85,7 +99,7 @@ impl MonkeyTree {
                 return Poly::new(&vec![Fraction::zero(), Fraction::one()]);
             }
         }
-        
+
         let expr = self.tree.get(&node);
         if expr.is_none() {
             panic!("Error: tree does not contain node {node}");
@@ -99,7 +113,7 @@ impl MonkeyTree {
                 Expr::Sub(s1, s2) => self.eval_node(s1) - self.eval_node(s2),
                 Expr::Mul(s1, s2) => self.eval_node(s1) - self.eval_node(s2),
                 Expr::Div(s1, s2) => self.eval_node(s1) - self.eval_node(s2),
-                _ => unreachable!()
+                _ => unreachable!(),
             };
         }
 
@@ -162,11 +176,11 @@ pub fn solve(contents: &str) -> (usize, usize) {
 
     tree.set_var("humn");
     let part2 = tree.solve_match();
-    
+
     if part2.denom() != 1 {
         panic!("Error: {part2} is not an integer");
     }
     let part2 = part2.num() as usize;
-    
+
     (part1, part2)
 }

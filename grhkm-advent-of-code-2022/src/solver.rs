@@ -41,7 +41,7 @@ pub const SOLS: [(*const (), SolverType); DAYS + 1] = [
 
 pub fn solve(contents: &str, day: usize) -> (String, String) {
     let (solver, solver_type) = &SOLS[day];
-    
+
     let now = Instant::now();
     let (part1, part2): (String, String) = unsafe {
         match solver_type {

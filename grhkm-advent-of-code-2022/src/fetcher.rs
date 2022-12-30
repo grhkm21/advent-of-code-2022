@@ -7,7 +7,8 @@ use std::process;
 fn get_client(url: &str, cookie_file_path: &String) -> Client {
     let url: Url = url.parse().unwrap();
 
-    let cookie = fs::read_to_string(cookie_file_path).unwrap_or_else(|_| format!("err: can't read cookie file {cookie_file_path}"));
+    let cookie = fs::read_to_string(cookie_file_path)
+        .unwrap_or_else(|_| format!("err: can't read cookie file {cookie_file_path}"));
 
     let jar = Jar::default();
     jar.add_cookie_str(&cookie, &url);
@@ -51,7 +52,13 @@ pub async fn fetch(day: usize, year: usize, cookie_file_path: &String) -> Result
 }
 
 #[tokio::main]
-pub async fn submit(day: usize, answer: String, level: usize, year: usize, cookie_file_path: &String) {
+pub async fn submit(
+    day: usize,
+    answer: String,
+    level: usize,
+    year: usize,
+    cookie_file_path: &String,
+) {
     if level != 1 && level != 2 {
         println!("err: level = {level} is not 1 or 2!");
         process::exit(1);

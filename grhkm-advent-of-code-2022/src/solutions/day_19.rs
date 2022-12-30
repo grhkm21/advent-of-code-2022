@@ -2,7 +2,7 @@ use lazy_static::lazy_static;
 use regex::Regex;
 use std::cmp::{max, Ordering, PartialEq, PartialOrd};
 
-#[derive(Copy, Clone, Debug, Default, PartialEq)] 
+#[derive(Copy, Clone, Debug, Default, PartialEq)]
 struct Resource {
     ore: i64,
     clay: i64,
@@ -21,26 +21,42 @@ struct Blueprint {
 
 impl PartialOrd for Resource {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        if self < other { return Some(Ordering::Less); }
-        else if self == other { return Some(Ordering::Equal); }
-        else if self > other { return Some(Ordering::Greater); }
+        if self < other {
+            return Some(Ordering::Less);
+        } else if self == other {
+            return Some(Ordering::Equal);
+        } else if self > other {
+            return Some(Ordering::Greater);
+        }
         None
     }
 
     fn lt(&self, other: &Self) -> bool {
-        self.ore < other.ore && self.clay < other.clay && self.obsidian < other.obsidian && self.geode < other.obsidian
+        self.ore < other.ore
+            && self.clay < other.clay
+            && self.obsidian < other.obsidian
+            && self.geode < other.obsidian
     }
 
     fn le(&self, other: &Self) -> bool {
-        self.ore <= other.ore && self.clay <= other.clay && self.obsidian <= other.obsidian && self.geode <= other.obsidian
+        self.ore <= other.ore
+            && self.clay <= other.clay
+            && self.obsidian <= other.obsidian
+            && self.geode <= other.obsidian
     }
 
     fn gt(&self, other: &Self) -> bool {
-        self.ore > other.ore && self.clay > other.clay && self.obsidian > other.obsidian && self.geode > other.obsidian
+        self.ore > other.ore
+            && self.clay > other.clay
+            && self.obsidian > other.obsidian
+            && self.geode > other.obsidian
     }
 
     fn ge(&self, other: &Self) -> bool {
-        self.ore >= other.ore && self.clay >= other.clay && self.obsidian >= other.obsidian && self.geode >= other.obsidian
+        self.ore >= other.ore
+            && self.clay >= other.clay
+            && self.obsidian >= other.obsidian
+            && self.geode >= other.obsidian
     }
 }
 
@@ -105,7 +121,10 @@ fn dfs(
 
     // If we can afford each of the robots, try them
     if resources >= &blueprint.geode_costs {
-        cur_best = max(cur_best, dfs(time - 1, robots, resources, blueprint, cur_best));
+        cur_best = max(
+            cur_best,
+            dfs(time - 1, robots, resources, blueprint, cur_best),
+        );
     }
 
     0
@@ -113,7 +132,7 @@ fn dfs(
 
 pub fn solve(contents: &str) -> (usize, usize) {
     let blueprints: Vec<Blueprint> = contents.lines().map(|l| Blueprint::new(l)).collect();
-    
+
     // println!("r1 > r2? {}", r1 > r2);
 
     (0, 0)

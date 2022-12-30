@@ -1,5 +1,5 @@
-use std::ops::Index;
 use super::points::*;
+use std::ops::Index;
 
 impl<T> Index<Point> for Vec<Vec<T>> {
     type Output = T;

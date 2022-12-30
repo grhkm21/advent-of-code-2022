@@ -4,16 +4,16 @@
 #![feature(let_chains)]
 #![feature(map_try_insert)]
 
+use advent_of_code_2022::*;
 use clap::{arg, command, ArgAction};
 use std::fs;
 use std::path::Path;
 use std::process;
-use advent_of_code_2022::*;
 
 struct Data {
     cookie_file_path: String,
     submit1: bool,
-    submit2: bool
+    submit2: bool,
 }
 
 // TODO: Wrap this into a struct
@@ -93,9 +93,11 @@ fn main() {
     let input_file_path: Option<&String> = matches.get_one("input");
     let submit1 = matches.get_flag("submit1") || matches.get_flag("s1");
     let submit2 = matches.get_flag("submit2") || matches.get_flag("s2");
-    
+
     let data = Data {
-        cookie_file_path, submit1, submit2
+        cookie_file_path,
+        submit1,
+        submit2,
     };
 
     if &day == "all" {
