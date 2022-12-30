@@ -1,16 +1,23 @@
 use std::collections::HashMap;
 use std::fmt::Display;
 use std::str::FromStr;
-use poly::poly::Poly;
+use poly::fraction::Fraction;
+use poly::poly::{Poly, Zero, One, Neg, Solvable};
 
 #[derive(Clone, Debug)]
 enum Expr {
-    Val(i128),
+    Val(Fraction),
     Add(String, String),
     Sub(String, String),
     Mul(String, String),
     Div(String, String),
-    Poly(Poly<i128>),
+    Poly(Poly<Fraction>),
+}
+
+impl Display for Expr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{self}")
+    }
 }
 
 impl FromStr for Expr {
@@ -19,7 +26,7 @@ impl FromStr for Expr {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         // Check if s contains all digits
         if let Ok(val) = s.parse::<i128>() {
-            return Ok(Expr::Val(val));
+            return Ok(Expr::Val(Fraction::new(val, 1)));
         }
 
         // Check if s is empty
@@ -40,19 +47,20 @@ impl FromStr for Expr {
 }
 
 struct MonkeyTree {
-    root: String,
+    root: Option<String>,
+    var: Option<String>,
     tree: HashMap<String, Expr>,
 }
 
 impl MonkeyTree {
     fn new() -> MonkeyTree {
         MonkeyTree {
-            root: "".to_string(),
+            root: None,
+            var: None,
             tree: HashMap::new(),
         }
     }
 
-    // pppw: cczh / lfqf
     fn insert<T>(&mut self, line: T) where T: Display + Into<String> {
         let line = line.to_string();
         let (name, expr) = line.split_once(": ").unwrap();
@@ -61,29 +69,78 @@ impl MonkeyTree {
 
     fn set_root<T>(&mut self, root: T) where T: Display + Into<String> {
         let root = root.to_string();
-        self.root = root;
+        self.root = Some(root);
     }
 
-    fn eval_node<T>(&self, node: T) -> i128 where T: Display + Into<String> {
+    fn set_var<T>(&mut self, var: T) where T: Display + Into<String> {
+        let var = var.to_string();
+        self.var = Some(var);
+    }
+
+    fn eval_node<T>(&self, node: T) -> Poly<Fraction> where T: Display + Into<String> {
         let node = node.to_string();
+        if let Some(var) = &self.var {
+            if &node == var {
+                println!("[!] Found variable");
+                return Poly::new(&vec![Fraction::zero(), Fraction::one()]);
+            }
+        }
         
         let expr = self.tree.get(&node);
         if expr.is_none() {
             panic!("Error: tree does not contain node {node}");
         }
 
-        match expr.unwrap() {
-            Expr::Val(val) => *val,
+        // If `var` is set, we always subtract and return a root
+        if self.var.is_some() && Some(node) == self.root {
+            println!("OP: {expr:?}");
+            return match expr.unwrap() {
+                Expr::Add(s1, s2) => self.eval_node(s1) - self.eval_node(s2),
+                Expr::Sub(s1, s2) => self.eval_node(s1) - self.eval_node(s2),
+                Expr::Mul(s1, s2) => self.eval_node(s1) - self.eval_node(s2),
+                Expr::Div(s1, s2) => self.eval_node(s1) - self.eval_node(s2),
+                _ => unreachable!()
+            };
+        }
+
+        let res = match expr.unwrap() {
+            Expr::Val(val) => Poly::from_const(*val),
             Expr::Add(s1, s2) => self.eval_node(s1) + self.eval_node(s2),
             Expr::Sub(s1, s2) => self.eval_node(s1) - self.eval_node(s2),
             Expr::Mul(s1, s2) => self.eval_node(s1) * self.eval_node(s2),
             Expr::Div(s1, s2) => self.eval_node(s1) / self.eval_node(s2),
-            Expr::Poly(_poly) => todo!()
-        }
+            Expr::Poly(poly) => poly.clone(),
+        };
+        res
     }
 
-    fn eval(&self) -> i128 {
-        self.eval_node(&self.root)
+    fn eval(&self) -> Poly<Fraction> {
+        if self.root.is_none() {
+            panic!("Error: calling eval while tree root not set");
+        }
+
+        if self.var.is_some() {
+            panic!("Error: calling eval while tree var is set");
+        }
+
+        self.eval_node(self.root.as_ref().unwrap())
+    }
+
+    // Finds value for `var` such that two sides of `root` are equal
+    fn solve_match(&self) -> Fraction {
+        if self.var.is_none() {
+            panic!("Error: calling solve_match while tree var is not set");
+        }
+
+        let eq = self.eval_node(self.root.as_ref().unwrap());
+        println!("EQ: {eq:?}");
+        let sols = eq.roots();
+
+        if sols.len() != 1 {
+            panic!("Error: calling solve_match returned {eq}, which has {sols:?} as solutions");
+        }
+
+        sols[0]
     }
 }
 
@@ -95,7 +152,21 @@ pub fn solve(contents: &str) -> (usize, usize) {
     }
 
     tree.set_root("root");
-    let part1 = tree.eval() as usize;
+    let root_eval = tree.eval();
+    let part1 = root_eval.get(0usize);
+
+    if root_eval.deg() != 0 || part1.denom() != 1 {
+        panic!("Error: {root_eval} is not an integer");
+    }
+    let part1 = part1.num() as usize;
+
+    tree.set_var("humn");
+    let part2 = tree.solve_match();
     
-    (part1, 0)
+    if part2.denom() != 1 {
+        panic!("Error: {part2} is not an integer");
+    }
+    let part2 = part2.num() as usize;
+    
+    (part1, part2)
 }
