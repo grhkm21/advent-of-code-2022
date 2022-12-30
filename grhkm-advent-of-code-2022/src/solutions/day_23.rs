@@ -48,7 +48,7 @@ fn round(elves: &mut HashSet<Point>, round: usize) -> bool {
             accepted_prefer = true;
         }
     }
-    return accepted_prefer;
+    accepted_prefer
 }
 
 fn get_bounding_box(grid: &HashSet<Point>) -> (i64, i64, i64, i64) {
@@ -94,14 +94,12 @@ pub fn solve(contents: &str) -> (usize, usize) {
         .lines()
         .map(|l| l.chars().collect())
         .collect::<Vec<Vec<char>>>();
-    let r = grid.len();
-    let c = grid[0].len();
 
     // extract elf positions
     let mut elves: HashSet<Point> = HashSet::new();
-    for x in 0..r {
-        for y in 0..c {
-            if grid[x][y] == '#' {
+    for (x, row) in grid.iter().enumerate() {
+        for (y, &chr) in row.iter().enumerate() {
+            if chr == '#' {
                 let x = x as i64;
                 let y = y as i64;
                 elves.insert(Point::new(x, y));

@@ -1,3 +1,6 @@
+// TODO: Remove this from day 19 is finished
+#![allow(unused_assignments, dead_code)]
+
 use lazy_static::lazy_static;
 use regex::Regex;
 use std::cmp::{max, Ordering, PartialEq, PartialOrd};
@@ -131,9 +134,11 @@ fn dfs(
 }
 
 pub fn solve(contents: &str) -> (usize, usize) {
-    let blueprints: Vec<Blueprint> = contents.lines().map(|l| Blueprint::new(l)).collect();
+    let _blueprints: Vec<Blueprint> = contents.lines().map(Blueprint::new).collect();
 
     // println!("r1 > r2? {}", r1 > r2);
+    // TODO: Solve day 19
+    todo!();
 
-    (0, 0)
+    // (0, 0)
 }

@@ -1,10 +1,10 @@
 #[macro_use]
 mod common;
 
-#[cfg(test)]
+#[cfg(sample_test)]
 mod tests {
     use super::common::utils::*;
-    use pretty_assertions::{assert_eq, assert_ne};
+    use pretty_assertions::assert_eq;
 
     solutions_tests! {
         test_day_00: (0, ("15", "150")),

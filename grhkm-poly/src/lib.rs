@@ -1,3 +1,4 @@
+#![allow(incomplete_features)]
 #![feature(trait_alias)]
 #![feature(specialization)]
 

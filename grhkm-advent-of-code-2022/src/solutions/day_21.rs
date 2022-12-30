@@ -1,5 +1,5 @@
 use poly::fraction::Fraction;
-use poly::poly::{Neg, One, Poly, Solvable, Zero};
+use poly::poly::{One, Poly, Solvable, Zero};
 use std::collections::HashMap;
 use std::fmt::Display;
 use std::str::FromStr;
@@ -11,12 +11,11 @@ enum Expr {
     Sub(String, String),
     Mul(String, String),
     Div(String, String),
-    Poly(Poly<Fraction>),
 }
 
 impl Display for Expr {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{self}")
+        write!(f, "{self:?}")
     }
 }
 
@@ -117,15 +116,13 @@ impl MonkeyTree {
             };
         }
 
-        let res = match expr.unwrap() {
+        match expr.unwrap() {
             Expr::Val(val) => Poly::from_const(*val),
             Expr::Add(s1, s2) => self.eval_node(s1) + self.eval_node(s2),
             Expr::Sub(s1, s2) => self.eval_node(s1) - self.eval_node(s2),
             Expr::Mul(s1, s2) => self.eval_node(s1) * self.eval_node(s2),
             Expr::Div(s1, s2) => self.eval_node(s1) / self.eval_node(s2),
-            Expr::Poly(poly) => poly.clone(),
-        };
-        res
+        }
     }
 
     fn eval(&self) -> Poly<Fraction> {

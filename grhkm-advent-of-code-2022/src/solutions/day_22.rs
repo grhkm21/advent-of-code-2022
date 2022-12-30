@@ -1,3 +1,4 @@
-pub fn solve(contents: &str) -> (usize, usize) {
+pub fn solve(_contents: &str) -> (usize, usize) {
+    // TOOD: Solve day 22
     todo!();
 }

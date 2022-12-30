@@ -9,13 +9,13 @@ fn mod_add(x: i64, y: i64, m: i64) -> i64 {
     (r + m) % m
 }
 
-fn solve_arr(arr: &Vec<Item>, times: usize) -> i64 {
-    let mut arr = arr.clone();
+fn solve_arr(arr: &[Item], times: usize) -> i64 {
+    let mut arr = arr.to_owned();
     let len = arr.len();
     for _ in 0..times {
         for i in 0..len {
             // Find original item
-            let j = (0..len).filter(|&k| arr[k].idx == i).next().unwrap();
+            let j = (0..len).find(|&k| arr[k].idx == i).unwrap();
             let item = arr[j];
             arr.remove(j);
 
@@ -26,7 +26,7 @@ fn solve_arr(arr: &Vec<Item>, times: usize) -> i64 {
     }
 
     // Find position of 0
-    let pos = (0..len).filter(|&k| arr[k].val == 0).next().unwrap();
+    let pos = (0..len).find(|&k| arr[k].val == 0).unwrap();
     arr[(pos + 1000) % len].val + arr[(pos + 2000) % len].val + arr[(pos + 3000) % len].val
 }
 

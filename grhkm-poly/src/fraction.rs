@@ -3,7 +3,7 @@ use std::fmt::Display;
 use std::mem::swap;
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
-#[derive(Copy, Clone, Debug, Eq, Ord)]
+#[derive(Copy, Clone, Debug, Eq)]
 pub struct Fraction {
     pub num: i128,
     pub denom: i128,
@@ -210,7 +210,7 @@ mod tests {
     fn test_arithmetic() {
         let f1 = Fraction::new(1, 3);
         let f2 = Fraction::new(1, 2);
-        let f3 = Fraction::new(2, 4);
+        // let f3 = Fraction::new(2, 4);
 
         assert_eq!(f1 + f2, Fraction::new(5, 6));
         assert_eq!(f1 - f2, Fraction::new(-1, 6));

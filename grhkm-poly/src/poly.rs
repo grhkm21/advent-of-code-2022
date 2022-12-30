@@ -168,12 +168,10 @@ where
             DisplayCoefType::One
         } else if self.is_positive() {
             DisplayCoefType::Pos(format!("{self}"))
+        } else if self.abs().is_one() {
+            DisplayCoefType::Neg("".to_string())
         } else {
-            if self.abs().is_one() {
-                DisplayCoefType::Neg("".to_string())
-            } else {
-                DisplayCoefType::Neg(format!("{}", self.abs()))
-            }
+            DisplayCoefType::Neg(format!("{}", self.abs()))
         }
     }
 }
@@ -236,38 +234,53 @@ pub struct Poly<T: Numeric> {
     coef: Vec<T>,
 }
 
-// Specialized Debug for integer-like polynomials
+// Specialized Display for integer-like polynomials
 impl<T> Display for Poly<T>
 where
     T: Numeric,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        if self.coef.len() == 1 && self.coef[0].is_zero() {
-            return write!(f, "0");
-        }
+        let mut has_displayed = false;
 
-        let mut coef_iter = self.coef.iter().enumerate();
-
-        while let Some((i, c)) = coef_iter.next() {
+        for (i, c) in self.coef.iter().enumerate() {
             let c = (*c).display_coef();
             if let DisplayCoefType::Zero = c {
                 continue;
-            } else {
+            }
+
+            if has_displayed {
                 match c {
                     DisplayCoefType::One => write!(f, " + ")?,
-                    DisplayCoefType::Pos(val) => write!(f, " + {val}")?,
-                    DisplayCoefType::Neg(val) => write!(f, " - {val}")?,
+                    DisplayCoefType::Pos(_) => write!(f, " + ")?,
+                    DisplayCoefType::Neg(_) => write!(f, " - ")?,
                     _ => unreachable!(),
                 };
             }
 
+            match c {
+                DisplayCoefType::One => 
+                    if !has_displayed {
+                        write!(f, "1")?
+                    },
+                DisplayCoefType::Pos(val) => write!(f, "{val}")?,
+                DisplayCoefType::Neg(val) => write!(f, "{val}")?,
+                _ => unreachable!(),
+            };
+
             if i > 0 {
                 write!(f, "x")?;
                 if i > 1 {
-                    write!(f, "^{}", i)?;
+                    write!(f, "^{i}")?;
                 }
             }
+
+            has_displayed = true;
         }
+
+        if !has_displayed {
+            write!(f, "0")?
+        }
+
         Ok(())
     }
 }
@@ -315,12 +328,13 @@ where
         let n = other.deg();
         let mut coef = vec![T::zero(); max(m, n) + 1];
 
-        for i in 0..=max(m, n) {
+        for (i, item) in coef.iter_mut().enumerate() {
             if i <= m {
-                coef[i] = coef[i] + self.get(i);
+                *item = *item + self.get(i);
             }
+
             if i <= n {
-                coef[i] = coef[i] + other.get(i);
+                *item = *item + other.get(i);
             }
         }
 
@@ -332,12 +346,13 @@ where
         let n = other.deg();
         let mut coef = vec![T::zero(); max(m, n) + 1];
 
-        for i in 0..=max(m, n) {
+        for (i, item) in coef.iter_mut().enumerate() {
             if i <= m {
-                coef[i] = coef[i] + self.get(i);
+                *item = *item + self.get(i);
             }
+
             if i <= n {
-                coef[i] = coef[i] - other.get(i);
+                *item = *item - other.get(i);
             }
         }
 
@@ -357,19 +372,12 @@ where
     }
 
     pub fn div(&self, other: &Poly<T>) -> Poly<T> {
-        let m = self.deg();
-        let n = other.deg();
-
-        if n != 0 {
+        if other.deg() != 0 {
             todo!("TODO: Cannot divide by non-constant polynomial {other}");
         }
 
-        let mut coef = self.coef.clone();
         let c = other.coef[0];
-
-        for i in 0..=m {
-            coef[i] = coef[i] / c;
-        }
+        let coef = self.coef.iter().map(|coef| *coef / c).collect::<Vec<T>>();
 
         Poly::new(&coef)
     }
@@ -442,7 +450,7 @@ where
 
         if self.deg() == 1 {
             let root = self.get(0).neg() / self.get(1);
-            return vec![root.into()];
+            return vec![root];
         }
 
         todo!()
@@ -476,7 +484,7 @@ where
     type Output = Poly<T>;
 
     fn add(self, other: Self) -> Self::Output {
-        Poly::add(&self, &other)
+        Poly::add(self, other)
     }
 }
 
@@ -498,7 +506,7 @@ where
     type Output = Poly<T>;
 
     fn sub(self, other: Self) -> Self::Output {
-        Poly::sub(&self, &other)
+        Poly::sub(self, other)
     }
 }
 
@@ -520,7 +528,7 @@ where
     type Output = Poly<T>;
 
     fn mul(self, other: Self) -> Self::Output {
-        Poly::mul(&self, &other)
+        Poly::mul(self, other)
     }
 }
 
@@ -542,7 +550,7 @@ where
     type Output = Poly<T>;
 
     fn div(self, other: Self) -> Self::Output {
-        Poly::div(&self, &other)
+        Poly::div(self, other)
     }
 }
 
@@ -666,6 +674,7 @@ impl Factor {
                 n = n / p;
                 c += 1;
             }
+
             if c > 0 {
                 res.push(FactorItem(p, c));
             }
@@ -819,7 +828,7 @@ mod tests {
 
     #[test]
     // TODO: Test negative coefficients, floats
-    fn test_debug() {
+    fn test_display() {
         assert_eq!(format!("{}", *POLY1), "1 + 2x + 3x^2");
         assert_eq!(format!("{}", *POLY2), "6 + 4x^2 + 3x^3");
         assert_eq!(format!("{}", *ZERO), "0");

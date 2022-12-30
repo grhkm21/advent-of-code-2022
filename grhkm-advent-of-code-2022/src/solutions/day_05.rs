@@ -39,7 +39,7 @@ fn _solve(contents: &str, option: OperationOrder) -> String {
     diagram_lines.reverse();
 
     // parse diagram into Vec<Vec<char>>
-    let cols = diagram_lines[0].trim().split_whitespace().count();
+    let cols = diagram_lines[0].split_whitespace().count();
     let mut rows = vec![Vec::new(); cols];
 
     for row in &diagram_lines[1..] {
